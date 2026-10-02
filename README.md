@@ -56,6 +56,24 @@ No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Ess
 
 > Observação: quando o app não é o discador padrão, o Android só consulta o serviço para números **fora** da agenda — o que é justamente o caso de spam.
 
+## Publicar no Google Play
+
+O CI gera, a cada push, o pacote `tomaesseblock-release-aab` (aba *Actions* → execução → *Artifacts*),
+com `versionCode` igual ao número da execução. Para ele sair **assinado** com a sua chave de upload:
+
+1. Crie a chave (uma vez só, e guarde o arquivo e as senhas em local seguro):
+   ```bash
+   keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. Em *Settings → Secrets and variables → Actions* do repositório, crie os secrets:
+   - `RELEASE_KEYSTORE_BASE64` — saída de `base64 -w0 upload.jks`
+   - `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS` (`upload`) e `RELEASE_KEY_PASSWORD`
+3. Envie o `.aab` no Play Console com o *Play App Signing* ativado.
+
+Também é preciso, no Play Console: link da [política de privacidade](PRIVACY.md), formulário de
+*Segurança dos dados* (contatos usados só no aparelho, nada coletado ou compartilhado), ícone
+512×512, imagem de destaque 1024×500 e capturas de tela.
+
 ## Próximos passos
 
 - Base **comunitária** de denúncias em um servidor (hoje as denúncias ficam no aparelho).

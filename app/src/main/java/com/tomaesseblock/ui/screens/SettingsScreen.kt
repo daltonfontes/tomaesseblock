@@ -1,5 +1,8 @@
 package com.tomaesseblock.ui.screens
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,13 +18,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.tomaesseblock.ui.MainViewModel
 import kotlin.math.roundToInt
 
+const val PRIVACY_POLICY_URL = "https://github.com/daltonfontes/tomaesseblock/blob/main/PRIVACY.md"
+
 @Composable
 fun SettingsScreen(vm: MainViewModel) {
     val s by vm.settings.collectAsState()
+    val context = LocalContext.current
 
     Column(
         Modifier
@@ -72,6 +79,17 @@ fun SettingsScreen(vm: MainViewModel) {
         SwitchRow("Notificar bloqueios", "Aviso a cada bloqueio. Desligado, a chamada só aparece no histórico do telefone", s.notifyBlocked) { v ->
             vm.updateSettings { it.copy(notifyBlocked = v) }
         }
+
+        HorizontalDivider()
+        SectionHeader("Sobre")
+        ListItem(
+            headlineContent = { Text("Política de privacidade") },
+            supportingContent = { Text("Nenhum dado sai do seu aparelho") },
+            modifier = Modifier.clickable {
+                // Sem navegador instalado, simplesmente não abre.
+                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))) }
+            },
+        )
     }
 }
 
