@@ -20,13 +20,13 @@ object CallDecisionEngine {
         rules: List<BlockRule>,
         spam: SpamSummary?,
     ): CallDecision {
-        if (!settings.blockingEnabled) return CallDecision.Allow(identify(call, spam))
+        if (!settings.blockingEnabled) return CallDecision.Allow(identify(call, spam), alertLevel(call, spam))
 
         if (call.isHidden || call.number.isEmpty()) {
             return if (settings.blockHidden) {
                 CallDecision.Block(BlockReason.HIDDEN, BlockReason.HIDDEN.label)
             } else {
-                CallDecision.Allow("Número oculto", isSuspicious = false)
+                CallDecision.Allow("Número oculto", AlertLevel.INFO)
             }
         }
 
@@ -56,7 +56,7 @@ object CallDecisionEngine {
             return CallDecision.Block(BlockReason.NOT_IN_CONTACTS, BlockReason.NOT_IN_CONTACTS.label)
         }
 
-        return CallDecision.Allow(identify(call, spam), isSuspicious = isSuspicious(call, spam))
+        return CallDecision.Allow(identify(call, spam), alertLevel(call, spam))
     }
 
     /** Texto do identificador de chamadas para chamadas que não foram bloqueadas. */
@@ -75,8 +75,14 @@ object CallDecisionEngine {
         }
     }
 
-    private fun isSuspicious(call: IncomingCall, spam: SpamSummary?): Boolean =
-        (spam != null && spam.reports > 0) || isTelemarketing0303(call.number)
+    /** Nível de alerta do identificador para uma chamada que vai tocar. */
+    fun alertLevel(call: IncomingCall, spam: SpamSummary?): AlertLevel = when {
+        call.contactName != null -> AlertLevel.NONE
+        spam != null && spam.reports > 0 -> AlertLevel.DANGER
+        isTelemarketing0303(call.number) -> AlertLevel.WARNING
+        identify(call, spam) != null -> AlertLevel.INFO
+        else -> AlertLevel.NONE
+    }
 
     fun isTelemarketing0303(number: String): Boolean = number.startsWith("0303")
 

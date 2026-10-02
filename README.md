@@ -8,7 +8,11 @@ App Android em **Kotlin** para identificar e bloquear chamadas indesejadas — i
 - **Lista de bloqueio** por número exato ou **por prefixo** (ex.: `0303`, um DDD inteiro, `1140…`).
 - **Telemarketing 0303** bloqueado por padrão (prefixo obrigatório da Anatel).
 - **Denúncias de spam** por categoria (telemarketing, golpe, cobrança, robô, pesquisa…), com limite configurável de denúncias para bloquear.
-- **Identificador de chamadas**: alerta "⚠ Possível spam" enquanto o telefone toca, com botão **Bloquear** na notificação.
+- **Aviso por cima da chamada** (estilo Whoscall): um cartão colorido aparece sobre a tela de chamada mostrando
+  quem está ligando — vermelho para spam denunciado, laranja para telemarketing 0303, azul para números
+  identificados (0800, centrais, internacionais) — com botão **Bloquear número**. Pode ser arrastado e some
+  sozinho quando a chamada é atendida ou encerrada. Em *Ajustes → Ver exemplo do aviso* dá para testar.
+- Sem a permissão de sobreposição, o identificador cai para uma notificação "⚠ Possível spam" com botão **Bloquear**.
 - **Buscar número**: consulte qualquer número para ver denúncias e o que o app faria com ele.
 - **Histórico** de chamadas bloqueadas/identificadas e estatísticas na tela inicial.
 - Opções de **bloquear números ocultos** e **modo rigoroso** (só contatos podem ligar).
@@ -35,6 +39,7 @@ app/src/main/java/com/tomaesseblock/
 ├── domain/   PhoneNumbers, CallDecisionEngine, modelos (lógica pura, testada)
 ├── data/     Room (regras, denúncias, histórico), DataStore (ajustes), contatos
 ├── service/  CallBlockerService, notificações e ações de notificação
+├── overlay/  CallerIdOverlay (cartão sobre a chamada) e CallStateWatcher
 └── ui/       Jetpack Compose + Material 3 (Início, Bloqueios, Histórico, Buscar, Ajustes)
 ```
 
@@ -49,12 +54,11 @@ Requisitos: Android Studio (Ladybug ou mais novo) / JDK 17 / Android SDK 35.
 
 O GitHub Actions (`.github/workflows/android.yml`) roda os testes e publica o APK de debug como artefato a cada push.
 
-No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Esse Block* como app de identificação de chamadas e spam → permita contatos e notificações.
+No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Esse Block* como app de identificação de chamadas e spam → permita contatos, notificações e estado das chamadas → toque em **Permitir aviso por cima da chamada** e ative *Exibir sobre outros apps*.
 
 > Observação: quando o app não é o discador padrão, o Android só consulta o serviço para números **fora** da agenda — o que é justamente o caso de spam.
 
 ## Próximos passos
 
 - Base **comunitária** de denúncias em um servidor (hoje as denúncias ficam no aparelho).
-- Sobreposição (overlay) com o identificador na tela de chamada.
 - Importar/exportar lista de bloqueio e bloqueio de SMS.

@@ -6,10 +6,13 @@ import android.telecom.CallScreeningService.CallResponse
 import android.telecom.TelecomManager
 import android.util.Log
 import com.tomaesseblock.TomaEsseBlockApp
+import com.tomaesseblock.domain.AlertLevel
+import com.tomaesseblock.domain.BlockSettings
 import com.tomaesseblock.domain.CallDecision
 import com.tomaesseblock.domain.CallDecisionEngine
 import com.tomaesseblock.domain.IncomingCall
 import com.tomaesseblock.domain.PhoneNumbers
+import com.tomaesseblock.overlay.CallerIdOverlay
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -51,11 +54,19 @@ class CallBlockerService : CallScreeningService() {
             when (decision) {
                 is CallDecision.Block ->
                     if (settings.notifyBlocked) Notifications.showBlocked(this@CallBlockerService, normalized, decision)
-                is CallDecision.Allow ->
-                    if (settings.showCallerId && decision.isSuspicious && decision.identification != null) {
-                        Notifications.showCallerId(this@CallBlockerService, normalized, decision.identification)
-                    }
+                is CallDecision.Allow -> showCallerId(settings, normalized, decision)
             }
+        }
+    }
+
+    /** Aviso por cima da chamada; se não houver permissão, cai para a notificação. */
+    private fun showCallerId(settings: BlockSettings, number: String, decision: CallDecision.Allow) {
+        val identification = decision.identification ?: return
+        if (!settings.showCallerId || decision.level == AlertLevel.NONE) return
+        val shown = settings.showOverlay &&
+            CallerIdOverlay.show(this, number, identification, decision.level)
+        if (!shown && decision.isSuspicious) {
+            Notifications.showCallerId(this, number, identification)
         }
     }
 

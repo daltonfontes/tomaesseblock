@@ -5,6 +5,10 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- Notificações de chamadas bloqueadas / identificador de chamadas. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Aviso "quem está ligando" desenhado por cima da tela de chamada. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Saber quando a chamada foi atendida/encerrada para fechar o aviso. -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:name=".TomaEsseBlockApp"
