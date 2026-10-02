@@ -34,8 +34,6 @@ data class BlockSettings(
     /** Quantidade mínima de denúncias para considerar o número spam. */
     val spamThreshold: Int = 1,
     val showCallerId: Boolean = true,
-    /** Mostra o identificador por cima da tela de chamada (requer "Exibir sobre outros apps"). */
-    val showOverlay: Boolean = true,
     val notifyBlocked: Boolean = true,
 )
 
@@ -48,26 +46,9 @@ enum class BlockReason(val label: String) {
     SPAM_REPORTED("Denunciado como spam"),
 }
 
-/** Quão chamativo deve ser o identificador de chamadas. */
-enum class AlertLevel {
-    /** Nada a mostrar (contato ou número comum). */
-    NONE,
-
-    /** Informativo: 0800, central de atendimento, internacional, oculto. */
-    INFO,
-
-    /** Suspeito: telemarketing 0303. */
-    WARNING,
-
-    /** Perigo: número com denúncias de spam. */
-    DANGER,
-}
-
 sealed interface CallDecision {
     /** Deixa tocar; [identification] é exibida como identificador de chamadas (estilo Whoscall). */
-    data class Allow(val identification: String? = null, val level: AlertLevel = AlertLevel.NONE) : CallDecision {
-        val isSuspicious: Boolean get() = level >= AlertLevel.WARNING
-    }
+    data class Allow(val identification: String? = null, val isSuspicious: Boolean = false) : CallDecision
 
     data class Block(val reason: BlockReason, val label: String) : CallDecision
 }

@@ -44,7 +44,7 @@ class CallDecisionEngineTest {
     fun `0303 apenas identificado quando bloqueio desligado`() {
         val s = defaults.copy(blockTelemarketing0303 = false)
         val d = CallDecisionEngine.decide(call("03031234567"), s, emptyList(), null)
-        assertEquals(CallDecision.Allow("Telemarketing (0303)", AlertLevel.WARNING), d)
+        assertEquals(CallDecision.Allow("Telemarketing (0303)", isSuspicious = true), d)
     }
 
     @Test
@@ -67,7 +67,7 @@ class CallDecisionEngineTest {
     fun `spam abaixo do limite e apenas identificado`() {
         val s = defaults.copy(spamThreshold = 3)
         val d = CallDecisionEngine.decide(call("11999998888"), s, emptyList(), SpamSummary(1, SpamCategory.TELEMARKETING))
-        assertEquals(CallDecision.Allow("Possível spam: Telemarketing (1 denúncia)", AlertLevel.DANGER), d)
+        assertEquals(CallDecision.Allow("Possível spam: Telemarketing (1 denúncia)", isSuspicious = true), d)
     }
 
     @Test
@@ -93,25 +93,6 @@ class CallDecisionEngineTest {
     @Test
     fun `numero comum sem denuncias e permitido sem identificacao`() {
         val d = CallDecisionEngine.decide(call("11999998888"), defaults, emptyList(), null)
-        assertEquals(CallDecision.Allow(null, AlertLevel.NONE), d)
-    }
-
-    @Test
-    fun `nivel de alerta`() {
-        assertEquals(AlertLevel.NONE, CallDecisionEngine.alertLevel(call("11999998888", contact = "Mãe"), null))
-        assertEquals(AlertLevel.NONE, CallDecisionEngine.alertLevel(call("11999998888"), null))
-        assertEquals(AlertLevel.INFO, CallDecisionEngine.alertLevel(call("08001234567"), null))
-        assertEquals(AlertLevel.INFO, CallDecisionEngine.alertLevel(call(""), null))
-        assertEquals(AlertLevel.WARNING, CallDecisionEngine.alertLevel(call("03031234567"), null))
-        assertEquals(
-            AlertLevel.DANGER,
-            CallDecisionEngine.alertLevel(call("11999998888"), SpamSummary(1, SpamCategory.SCAM)),
-        )
-    }
-
-    @Test
-    fun `numero 0800 e identificado como informativo`() {
-        val d = CallDecisionEngine.decide(call("08001234567"), defaults, emptyList(), null)
-        assertEquals(CallDecision.Allow("Ligação gratuita (0800)", AlertLevel.INFO), d)
+        assertEquals(CallDecision.Allow(null, isSuspicious = false), d)
     }
 }

@@ -3,11 +3,8 @@ package com.tomaesseblock.ui.screens
 import android.Manifest
 import android.app.role.RoleManager
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -43,17 +40,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import com.tomaesseblock.overlay.CallerIdOverlay
 import com.tomaesseblock.ui.MainViewModel
 import com.tomaesseblock.ui.theme.Danger
 import com.tomaesseblock.ui.theme.Safe
 
 private fun Context.holdsScreeningRole(): Boolean =
     getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
-
-/** Abre a tela do sistema "Exibir sobre outros apps" já no nosso app. */
-fun overlayPermissionIntent(context: Context): Intent =
-    Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}"))
 
 private fun Context.hasPermission(permission: String): Boolean =
     ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
@@ -68,8 +60,6 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
 
     var hasRole by remember { mutableStateOf(context.holdsScreeningRole()) }
     var hasContacts by remember { mutableStateOf(context.hasPermission(Manifest.permission.READ_CONTACTS)) }
-    var hasPhoneState by remember { mutableStateOf(context.hasPermission(Manifest.permission.READ_PHONE_STATE)) }
-    var hasOverlay by remember { mutableStateOf(CallerIdOverlay.canDrawOverlays(context)) }
     var hasNotifications by remember {
         mutableStateOf(
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -81,8 +71,6 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
     LifecycleResumeEffect(Unit) {
         hasRole = context.holdsScreeningRole()
         hasContacts = context.hasPermission(Manifest.permission.READ_CONTACTS)
-        hasPhoneState = context.hasPermission(Manifest.permission.READ_PHONE_STATE)
-        hasOverlay = CallerIdOverlay.canDrawOverlays(context)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             hasNotifications = context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -94,7 +82,6 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
     }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         hasContacts = context.hasPermission(Manifest.permission.READ_CONTACTS)
-        hasPhoneState = context.hasPermission(Manifest.permission.READ_PHONE_STATE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             hasNotifications = context.hasPermission(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -151,12 +138,11 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
             ) { Text("Ativar bloqueio de chamadas") }
         }
 
-        if (!hasContacts || !hasNotifications || !hasPhoneState) {
+        if (!hasContacts || !hasNotifications) {
             OutlinedButton(
                 onClick = {
                     val perms = buildList {
                         add(Manifest.permission.READ_CONTACTS)
-                        add(Manifest.permission.READ_PHONE_STATE)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             add(Manifest.permission.POST_NOTIFICATIONS)
                         }
@@ -172,19 +158,11 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
                             listOfNotNull(
                                 "contatos".takeIf { !hasContacts },
                                 "notificações".takeIf { !hasNotifications },
-                                "estado das chamadas".takeIf { !hasPhoneState },
-                            ).joinToString(", "),
+                            ).joinToString(" e "),
                         )
                     },
                 )
             }
-        }
-
-        if (!hasOverlay) {
-            OutlinedButton(
-                onClick = { context.startActivity(overlayPermissionIntent(context)) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            ) { Text("Permitir aviso por cima da chamada") }
         }
 
         Row(

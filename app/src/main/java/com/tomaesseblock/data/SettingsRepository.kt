@@ -23,7 +23,6 @@ class SettingsRepository(private val context: Context) {
         val SPAM = booleanPreferencesKey("block_reported_spam")
         val THRESHOLD = intPreferencesKey("spam_threshold")
         val CALLER_ID = booleanPreferencesKey("show_caller_id")
-        val OVERLAY = booleanPreferencesKey("show_overlay")
         val NOTIFY = booleanPreferencesKey("notify_blocked")
     }
 
@@ -41,7 +40,6 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.SPAM] = s.blockReportedSpam
             prefs[Keys.THRESHOLD] = s.spamThreshold
             prefs[Keys.CALLER_ID] = s.showCallerId
-            prefs[Keys.OVERLAY] = s.showOverlay
             prefs[Keys.NOTIFY] = s.notifyBlocked
         }
     }
@@ -56,7 +54,6 @@ class SettingsRepository(private val context: Context) {
             blockReportedSpam = this[Keys.SPAM] ?: d.blockReportedSpam,
             spamThreshold = this[Keys.THRESHOLD] ?: d.spamThreshold,
             showCallerId = this[Keys.CALLER_ID] ?: d.showCallerId,
-            showOverlay = this[Keys.OVERLAY] ?: d.showOverlay,
             notifyBlocked = this[Keys.NOTIFY] ?: d.notifyBlocked,
         )
     }
