@@ -7,20 +7,38 @@ plugins {
 
 android {
     namespace = "com.tomaesseblock"
-    compileSdk = 35
+    // Google Play exige targetSdk 36 (Android 16) para apps novos desde 31/08/2026.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.tomaesseblock"
         // CallScreeningService + RoleManager.ROLE_CALL_SCREENING exigem Android 10 (API 29).
         minSdk = 29
-        targetSdk = 35
-        versionCode = 1
+        targetSdk = 36
+        // O Play exige um versionCode maior a cada envio; o CI usa o número da execução.
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 1
         versionName = "0.1.0"
+    }
+
+    // Chave de upload do Play: lida de variáveis de ambiente (secrets do GitHub), nunca do repositório.
+    // Sem elas, o pacote de release é gerado sem assinatura (útil só para validar o build).
+    val releaseKeystore = System.getenv("RELEASE_KEYSTORE_PATH")
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

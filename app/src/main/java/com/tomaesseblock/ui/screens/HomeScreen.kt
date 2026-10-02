@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -87,6 +89,23 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
         }
     }
 
+    var showDisclosure by remember { mutableStateOf(false) }
+    if (showDisclosure) {
+        PermissionDisclosureDialog(
+            onAccept = {
+                showDisclosure = false
+                val perms = buildList {
+                    add(Manifest.permission.READ_CONTACTS)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        add(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+                permissionLauncher.launch(perms.toTypedArray())
+            },
+            onDismiss = { showDisclosure = false },
+        )
+    }
+
     val protectedNow = hasRole && settings.blockingEnabled
 
     Column(
@@ -140,15 +159,8 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
 
         if (!hasContacts || !hasNotifications) {
             OutlinedButton(
-                onClick = {
-                    val perms = buildList {
-                        add(Manifest.permission.READ_CONTACTS)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            add(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }
-                    permissionLauncher.launch(perms.toTypedArray())
-                },
+                // Explica o uso dos dados antes do pedido do sistema (exigência do Google Play).
+                onClick = { showDisclosure = true },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             ) {
                 Text(
@@ -186,6 +198,25 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
             }
         }
     }
+}
+
+/** Divulgação clara de como os contatos são usados, mostrada antes do pedido de permissão. */
+@Composable
+private fun PermissionDisclosureDialog(onAccept: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Por que pedimos essas permissões") },
+        text = {
+            Text(
+                "Contatos: usamos a sua agenda apenas para conferir se quem está ligando é um contato, " +
+                    "para nunca bloquear essas pessoas. Seus contatos não são copiados, guardados nem " +
+                    "enviados para lugar nenhum — tudo acontece só neste aparelho.\n\n" +
+                    "Notificações: usadas só se você ativar os avisos de bloqueio nos ajustes.",
+            )
+        },
+        confirmButton = { TextButton(onClick = onAccept) { Text("Continuar") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Agora não") } },
+    )
 }
 
 @Composable
