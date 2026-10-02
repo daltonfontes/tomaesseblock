@@ -42,7 +42,9 @@ O app lida com dados sensíveis do usuário, por isso estes pontos são especial
 - **Triagem de chamadas** (`CallBlockerService`): qualquer forma de outro app ou de um terceiro fazer
   chamadas legítimas serem bloqueadas, ou chamadas bloqueadas tocarem, sem a vontade do usuário.
 - **Dados locais**: lista de bloqueio, denúncias de spam, histórico de chamadas e ajustes ficam
-  apenas no aparelho (Room e DataStore). Acesso a esses dados por outros apps é uma vulnerabilidade.
+  apenas no aparelho (Room e DataStore). O backup do Android está desligado (`allowBackup="false"` e
+  regras de extração que excluem tudo), então esses dados não vão para a nuvem nem para outro aparelho.
+  Acesso a esses dados por outros apps é uma vulnerabilidade.
 - **Contatos**: o app lê os contatos apenas para verificar se um número está na agenda e não os
   armazena nem os envia para lugar nenhum.
 - **Componentes exportados**: o serviço de triagem só aceita conexões do sistema
