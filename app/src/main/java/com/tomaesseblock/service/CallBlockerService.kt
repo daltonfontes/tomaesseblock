@@ -78,6 +78,8 @@ class CallBlockerService : CallScreeningService() {
     }
 
     private fun CallDecision.toResponse(): CallResponse = when (this) {
+        // Bloqueio silencioso: o telefone não toca, a chamada é recusada e o próprio Android
+        // registra no histórico de chamadas como "bloqueada", sem notificação do sistema.
         is CallDecision.Block -> CallResponse.Builder()
             .setDisallowCall(true)
             .setRejectCall(true)

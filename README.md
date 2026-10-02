@@ -4,11 +4,14 @@ App Android em **Kotlin** para identificar e bloquear chamadas indesejadas — i
 
 ## Funcionalidades
 
-- **Bloqueio automático** antes do telefone tocar, usando a API oficial `CallScreeningService` (Android 10+).
+- **Bloqueio silencioso** (como no Whoscall): o telefone nem toca, nada aparece na tela e a chamada fica
+  registrada como **bloqueada** no histórico de chamadas do próprio telefone (e no histórico do app).
+  Usa a API oficial `CallScreeningService` (Android 10+).
 - **Lista de bloqueio** por número exato ou **por prefixo** (ex.: `0303`, um DDD inteiro, `1140…`).
 - **Telemarketing 0303** bloqueado por padrão (prefixo obrigatório da Anatel).
 - **Denúncias de spam** por categoria (telemarketing, golpe, cobrança, robô, pesquisa…), com limite configurável de denúncias para bloquear.
-- **Identificador de chamadas**: alerta "⚠ Possível spam" enquanto o telefone toca, com botão **Bloquear** na notificação.
+- Opcional, em Ajustes (desligado por padrão): notificação a cada bloqueio e alerta "⚠ Possível spam" para
+  chamadas suspeitas que não foram bloqueadas.
 - **Buscar número**: consulte qualquer número para ver denúncias e o que o app faria com ele.
 - **Histórico** de chamadas bloqueadas/identificadas e estatísticas na tela inicial.
 - Opções de **bloquear números ocultos** e **modo rigoroso** (só contatos podem ligar).
@@ -56,5 +59,4 @@ No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Ess
 ## Próximos passos
 
 - Base **comunitária** de denúncias em um servidor (hoje as denúncias ficam no aparelho).
-- Sobreposição (overlay) com o identificador na tela de chamada.
 - Importar/exportar lista de bloqueio e bloqueio de SMS.

@@ -66,10 +66,10 @@ fun SettingsScreen(vm: MainViewModel) {
 
         HorizontalDivider()
         SectionHeader("Avisos")
-        SwitchRow("Identificador de chamadas", "Alerta de possível spam enquanto o telefone toca", s.showCallerId) { v ->
+        SwitchRow("Identificador de chamadas", "Notificação de possível spam para chamadas suspeitas que não foram bloqueadas", s.showCallerId) { v ->
             vm.updateSettings { it.copy(showCallerId = v) }
         }
-        SwitchRow("Notificar bloqueios", "Mostra uma notificação a cada chamada bloqueada", s.notifyBlocked) { v ->
+        SwitchRow("Notificar bloqueios", "Aviso a cada bloqueio. Desligado, a chamada só aparece no histórico do telefone", s.notifyBlocked) { v ->
             vm.updateSettings { it.copy(notifyBlocked = v) }
         }
     }

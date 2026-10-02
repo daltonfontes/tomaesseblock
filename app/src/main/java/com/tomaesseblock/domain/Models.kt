@@ -33,8 +33,10 @@ data class BlockSettings(
     val blockReportedSpam: Boolean = true,
     /** Quantidade mínima de denúncias para considerar o número spam. */
     val spamThreshold: Int = 1,
-    val showCallerId: Boolean = true,
-    val notifyBlocked: Boolean = true,
+    // Por padrão o bloqueio é silencioso (como no Whoscall): nada aparece na tela, a chamada
+    // só fica registrada como "bloqueada" no histórico do telefone e no histórico do app.
+    val showCallerId: Boolean = false,
+    val notifyBlocked: Boolean = false,
 )
 
 enum class BlockReason(val label: String) {
