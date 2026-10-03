@@ -9,11 +9,18 @@ App Android em **Kotlin** para identificar e bloquear chamadas indesejadas — i
   Usa a API oficial `CallScreeningService` (Android 10+).
 - **Lista de bloqueio** por número exato ou **por prefixo** (ex.: `0303`, um DDD inteiro, `1140…`).
 - **Telemarketing 0303** bloqueado por padrão (prefixo obrigatório da Anatel).
-- **Denúncias de spam** por categoria (telemarketing, golpe, cobrança, robô, pesquisa…), com limite configurável de denúncias para bloquear.
+- **Denúncias de spam** por categoria (telemarketing, golpe, cobrança, robô, pesquisa…), com limite configurável de denúncias
+  e escolha de **quais categorias bloqueiam** (as demais só identificam).
+- **Lista de permitidos** ("sempre permitir"), por número ou prefixo: sempre toca, por cima de qualquer bloqueio.
+- **Bloquear ligações internacionais** (+1, +44, +62…), opcional.
+- **Deixar tocar se ligar de novo**: quem foi barrado por um bloqueio amplo (fora dos contatos, internacional ou
+  prefixo) e liga de novo em até 5 minutos consegue chamar. Bloqueios escolhidos, 0303 e spam continuam valendo.
+- **Backup manual**: exportar/importar listas e denúncias num arquivo JSON (o backup automático do Android fica desligado).
 - Opcional, em Ajustes (desligado por padrão): notificação a cada bloqueio e alerta "⚠ Possível spam" para
   chamadas suspeitas que não foram bloqueadas.
 - **Buscar número**: consulte qualquer número para ver denúncias e o que o app faria com ele.
-- **Histórico** de chamadas bloqueadas/identificadas e estatísticas na tela inicial.
+- **Histórico** de chamadas bloqueadas/identificadas, com menu ⋮ para bloquear, desbloquear, sempre permitir ou
+  denunciar, e estatísticas na tela inicial.
 - Opções de **bloquear números ocultos** e **modo rigoroso** (só contatos podem ligar).
 - Contatos da agenda nunca são bloqueados (a não ser que você os coloque na lista de bloqueio).
 
@@ -29,7 +36,8 @@ Chamada recebida
         └─ grava no histórico e mostra notificação
 ```
 
-Ordem de decisão: oculto → lista de bloqueio (exato, prefixo) → contatos → 0303 → denúncias → modo rigoroso.
+Ordem de decisão: oculto → permitidos → lista de bloqueio (exato, prefixo) → contatos → 0303 → denúncias →
+internacionais → modo rigoroso; por fim, a exceção "ligou de novo" para os bloqueios amplos.
 
 ## Estrutura
 
@@ -85,4 +93,3 @@ Deploy from a branch → Branch: `main` / pasta `/docs`*.
 ## Próximos passos
 
 - Base **comunitária** de denúncias em um servidor (hoje as denúncias ficam no aparelho).
-- Importar/exportar lista de bloqueio e bloqueio de SMS.

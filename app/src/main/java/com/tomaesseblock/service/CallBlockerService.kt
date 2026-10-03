@@ -73,6 +73,7 @@ class CallBlockerService : CallScreeningService() {
             settings = container.settings.current(),
             rules = container.repository.allRules(),
             spam = container.repository.spamSummary(normalized),
+            recentBlockedAttempts = if (hidden) 0 else container.repository.recentBlockedAttempts(normalized),
         )
     }
 

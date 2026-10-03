@@ -57,6 +57,8 @@ fun LookupScreen(vm: MainViewModel) {
         onUnblock = vm::unblockFromLookup,
         onReport = vm::report,
         onClearReports = vm::clearReports,
+        onAllow = vm::allowFromLookup,
+        onRemoveAllowed = vm::removeAllowedFromLookup,
     )
 }
 
@@ -69,6 +71,8 @@ fun LookupContent(
     onUnblock: () -> Unit,
     onReport: (SpamCategory) -> Unit,
     onClearReports: () -> Unit,
+    onAllow: () -> Unit,
+    onRemoveAllowed: () -> Unit,
 ) {
     var query by remember { mutableStateOf(result?.number.orEmpty()) }
     var showReport by remember { mutableStateOf(false) }
@@ -109,6 +113,15 @@ fun LookupContent(
                 }
                 OutlinedButton(onClick = { showReport = true }, modifier = Modifier.weight(1f)) { Text("Denunciar") }
             }
+            if (r.isAllowedExact) {
+                TextButton(onClick = onRemoveAllowed, modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Text("Remover dos permitidos")
+                }
+            } else {
+                TextButton(onClick = onAllow, modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Text("Sempre permitir este número")
+                }
+            }
             if (r.spam != null) {
                 TextButton(onClick = onClearReports, modifier = Modifier.padding(horizontal = 8.dp)) {
                     Text("Não é spam (remover denúncias)")
@@ -131,6 +144,7 @@ fun LookupContent(
 @Composable
 private fun ResultCard(r: LookupResult) {
     val (color, verdict) = when {
+        r.isAllowedExact -> Safe to "Na sua lista de permitidos — sempre toca"
         r.decision is CallDecision.Block -> Danger to "Será bloqueado: ${r.decision.label}"
         r.spam != null -> Warning to "Suspeito — será identificado, mas não bloqueado"
         else -> Safe to "Sem denúncias — chamada permitida"
@@ -155,7 +169,7 @@ private fun ResultCard(r: LookupResult) {
 }
 
 @Composable
-private fun ReportDialog(onDismiss: () -> Unit, onConfirm: (SpamCategory) -> Unit) {
+internal fun ReportDialog(onDismiss: () -> Unit, onConfirm: (SpamCategory) -> Unit) {
     var selected by remember { mutableStateOf(SpamCategory.TELEMARKETING) }
     AlertDialog(
         onDismissRequest = onDismiss,

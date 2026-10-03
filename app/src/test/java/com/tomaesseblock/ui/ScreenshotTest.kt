@@ -11,6 +11,7 @@ import com.tomaesseblock.domain.BlockReason
 import com.tomaesseblock.domain.BlockRule
 import com.tomaesseblock.domain.BlockSettings
 import com.tomaesseblock.domain.CallDecision
+import com.tomaesseblock.domain.RuleAction
 import com.tomaesseblock.domain.RuleType
 import com.tomaesseblock.domain.SpamCategory
 import com.tomaesseblock.domain.SpamSummary
@@ -60,12 +61,32 @@ class ScreenshotTest {
 
     @Test
     fun bloqueios() = shotBothThemes(Tab.BLOCKLIST) {
-        BlockListContent(rules = SAMPLE_RULES, onRemove = {}, onAdd = { _, _, _ -> })
+        BlockListContent(rules = SAMPLE_RULES, onRemove = {}, onAdd = { _, _, _, _ -> })
+    }
+
+    @Test
+    fun permitidos() = shotBothThemes(Tab.BLOCKLIST) {
+        BlockListContent(
+            rules = SAMPLE_RULES,
+            onRemove = {},
+            onAdd = { _, _, _, _ -> },
+            initialAction = RuleAction.ALLOW,
+        )
     }
 
     @Test
     fun historico() = shotBothThemes(Tab.HISTORY) {
-        HistoryContent(history = SAMPLE_HISTORY, onClear = {}, onOpenNumber = {})
+        HistoryContent(
+            history = SAMPLE_HISTORY,
+            rules = SAMPLE_RULES,
+            onClear = {},
+            onOpenNumber = {},
+            onBlock = {},
+            onUnblock = {},
+            onAllow = {},
+            onRemoveAllowed = {},
+            onReport = { _, _ -> },
+        )
     }
 
     @Test
@@ -77,6 +98,8 @@ class ScreenshotTest {
             onUnblock = {},
             onReport = {},
             onClearReports = {},
+            onAllow = {},
+            onRemoveAllowed = {},
         )
     }
 
@@ -107,6 +130,14 @@ class ScreenshotTest {
             BlockRule(id = 2, pattern = "11987654321", type = RuleType.EXACT, label = "Golpe do falso banco"),
             BlockRule(id = 3, pattern = "1140", type = RuleType.PREFIX, label = "Call center"),
             BlockRule(id = 4, pattern = "21998887777", type = RuleType.EXACT, label = ""),
+            BlockRule(
+                id = 5, pattern = "1133224455", type = RuleType.EXACT, label = "Consultório Dra. Ana",
+                action = RuleAction.ALLOW,
+            ),
+            BlockRule(
+                id = 6, pattern = "1140045678", type = RuleType.EXACT, label = "Escola das crianças",
+                action = RuleAction.ALLOW,
+            ),
         )
 
         val SAMPLE_HISTORY = listOf(
@@ -133,6 +164,10 @@ class ScreenshotTest {
             CallEventEntity(
                 id = 6, number = "", timestamp = BASE_TIME - 30 * HOUR, blocked = true,
                 reason = BlockReason.HIDDEN.name, label = "Número oculto",
+            ),
+            CallEventEntity(
+                id = 7, number = "+447911123456", timestamp = BASE_TIME - 31 * HOUR, blocked = true,
+                reason = BlockReason.INTERNATIONAL.name, label = "Ligação internacional",
             ),
         )
 

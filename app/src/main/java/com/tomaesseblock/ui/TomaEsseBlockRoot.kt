@@ -1,5 +1,6 @@
 package com.tomaesseblock.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -14,8 +15,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -40,6 +43,10 @@ internal enum class Tab(val route: String, val label: String, val icon: ImageVec
 @Composable
 fun TomaEsseBlockRoot(vm: MainViewModel = viewModel(factory = MainViewModel.Factory)) {
     val nav = rememberNavController()
+    val context = LocalContext.current
+    LaunchedEffect(vm) {
+        vm.messages.collect { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+    }
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 

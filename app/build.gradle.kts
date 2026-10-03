@@ -85,5 +85,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)
+    // org.json real nos testes JVM (no android.jar ela é só um stub).
+    testImplementation(libs.org.json)
     testImplementation(libs.kotlinx.coroutines.test)
 }

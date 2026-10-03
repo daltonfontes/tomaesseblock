@@ -5,8 +5,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.tomaesseblock.domain.BlockSettings
+import com.tomaesseblock.domain.SpamCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -24,6 +26,9 @@ class SettingsRepository(private val context: Context) {
         val THRESHOLD = intPreferencesKey("spam_threshold")
         val CALLER_ID = booleanPreferencesKey("show_caller_id")
         val NOTIFY = booleanPreferencesKey("notify_blocked")
+        val INTERNATIONAL = booleanPreferencesKey("block_international")
+        val REPEATED = booleanPreferencesKey("allow_repeated_calls")
+        val SPAM_CATEGORIES = stringSetPreferencesKey("blocked_spam_categories")
     }
 
     val settings: Flow<BlockSettings> = context.dataStore.data.map { it.toSettings() }
@@ -41,6 +46,9 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.THRESHOLD] = s.spamThreshold
             prefs[Keys.CALLER_ID] = s.showCallerId
             prefs[Keys.NOTIFY] = s.notifyBlocked
+            prefs[Keys.INTERNATIONAL] = s.blockInternational
+            prefs[Keys.REPEATED] = s.allowRepeatedCalls
+            prefs[Keys.SPAM_CATEGORIES] = s.blockedSpamCategories.map { it.name }.toSet()
         }
     }
 
@@ -55,6 +63,12 @@ class SettingsRepository(private val context: Context) {
             spamThreshold = this[Keys.THRESHOLD] ?: d.spamThreshold,
             showCallerId = this[Keys.CALLER_ID] ?: d.showCallerId,
             notifyBlocked = this[Keys.NOTIFY] ?: d.notifyBlocked,
+            blockInternational = this[Keys.INTERNATIONAL] ?: d.blockInternational,
+            allowRepeatedCalls = this[Keys.REPEATED] ?: d.allowRepeatedCalls,
+            blockedSpamCategories = this[Keys.SPAM_CATEGORIES]
+                ?.mapNotNull { name -> SpamCategory.entries.firstOrNull { it.name == name } }
+                ?.toSet()
+                ?: d.blockedSpamCategories,
         )
     }
 }

@@ -95,4 +95,114 @@ class CallDecisionEngineTest {
         val d = CallDecisionEngine.decide(call("11999998888"), defaults, emptyList(), null)
         assertEquals(CallDecision.Allow(null, isSuspicious = false), d)
     }
+
+    // --- Lista de permitidos ---
+
+    @Test
+    fun `permitido vence bloqueio exato e modo rigoroso`() {
+        val rules = listOf(
+            BlockRule(pattern = "11999998888", type = RuleType.EXACT, action = RuleAction.BLOCK),
+            BlockRule(pattern = "11999998888", type = RuleType.EXACT, label = "Médico", action = RuleAction.ALLOW),
+        )
+        val s = defaults.copy(blockNotInContacts = true)
+        assertEquals(CallDecision.Allow("Médico"), CallDecisionEngine.decide(call("11999998888"), s, rules, null))
+    }
+
+    @Test
+    fun `prefixo permitido vence prefixo bloqueado e spam`() {
+        val rules = listOf(
+            BlockRule(pattern = "11", type = RuleType.PREFIX, action = RuleAction.BLOCK),
+            BlockRule(pattern = "1133", type = RuleType.PREFIX, action = RuleAction.ALLOW),
+        )
+        val d = CallDecisionEngine.decide(call("1133334444"), defaults, rules, SpamSummary(5, SpamCategory.SCAM))
+        assertEquals(CallDecision.Allow(CallDecisionEngine.ALLOW_LIST_LABEL), d)
+    }
+
+    @Test
+    fun `regra de permitido nao bloqueia outros numeros`() {
+        val rules = listOf(BlockRule(pattern = "1133", type = RuleType.PREFIX, action = RuleAction.ALLOW))
+        val d = CallDecisionEngine.decide(call("03031234567"), defaults, rules, null)
+        assertEquals(BlockReason.TELEMARKETING_0303, (d as CallDecision.Block).reason)
+    }
+
+    @Test
+    fun `permitido nao libera numero oculto`() {
+        val rules = listOf(BlockRule(pattern = "11", type = RuleType.PREFIX, action = RuleAction.ALLOW))
+        val d = CallDecisionEngine.decide(call(""), defaults.copy(blockHidden = true), rules, null)
+        assertEquals(BlockReason.HIDDEN, (d as CallDecision.Block).reason)
+    }
+
+    // --- Ligou de novo ---
+
+    @Test
+    fun `segunda ligacao de desconhecido toca no modo rigoroso`() {
+        val s = defaults.copy(blockNotInContacts = true)
+        assertTrue(CallDecisionEngine.decide(call("11999998888"), s, emptyList(), null) is CallDecision.Block)
+        val again = CallDecisionEngine.decide(call("11999998888"), s, emptyList(), null, recentBlockedAttempts = 1)
+        assertEquals(CallDecision.Allow(CallDecisionEngine.REPEATED_CALL_LABEL), again)
+    }
+
+    @Test
+    fun `ligou de novo vale para internacional e prefixo`() {
+        val intl = CallDecisionEngine.decide(
+            call("+12125551234"), defaults.copy(blockInternational = true), emptyList(), null, recentBlockedAttempts = 2,
+        )
+        assertTrue(intl is CallDecision.Allow)
+        val rules = listOf(BlockRule(pattern = "11", type = RuleType.PREFIX))
+        val prefix = CallDecisionEngine.decide(call("11999998888"), defaults, rules, null, recentBlockedAttempts = 1)
+        assertTrue(prefix is CallDecision.Allow)
+    }
+
+    @Test
+    fun `ligou de novo nao libera bloqueio escolhido, spam nem 0303`() {
+        val exact = listOf(BlockRule(pattern = "11999998888", type = RuleType.EXACT))
+        assertTrue(CallDecisionEngine.decide(call("11999998888"), defaults, exact, null, 3) is CallDecision.Block)
+        val spam = SpamSummary(2, SpamCategory.SCAM)
+        assertTrue(CallDecisionEngine.decide(call("11988887777"), defaults, emptyList(), spam, 3) is CallDecision.Block)
+        assertTrue(CallDecisionEngine.decide(call("03031234567"), defaults, emptyList(), null, 3) is CallDecision.Block)
+    }
+
+    @Test
+    fun `ligou de novo desligado mantem bloqueio`() {
+        val s = defaults.copy(blockNotInContacts = true, allowRepeatedCalls = false)
+        val d = CallDecisionEngine.decide(call("11999998888"), s, emptyList(), null, recentBlockedAttempts = 5)
+        assertEquals(BlockReason.NOT_IN_CONTACTS, (d as CallDecision.Block).reason)
+    }
+
+    // --- Categorias de spam ---
+
+    @Test
+    fun `categoria desmarcada so identifica`() {
+        val s = defaults.copy(blockedSpamCategories = setOf(SpamCategory.SCAM))
+        val survey = SpamSummary(4, SpamCategory.SURVEY)
+        val d = CallDecisionEngine.decide(call("11999998888"), s, emptyList(), survey)
+        assertEquals(CallDecision.Allow("Possível spam: Pesquisa (4 denúncias)", isSuspicious = true), d)
+        val scam = SpamSummary(1, SpamCategory.SCAM)
+        assertTrue(CallDecisionEngine.decide(call("11999998888"), s, emptyList(), scam) is CallDecision.Block)
+    }
+
+    // --- Internacionais ---
+
+    @Test
+    fun `internacional bloqueado so quando ligado`() {
+        val n = call("+447911123456")
+        assertTrue(CallDecisionEngine.decide(n, defaults, emptyList(), null) is CallDecision.Allow)
+        val d = CallDecisionEngine.decide(n, defaults.copy(blockInternational = true), emptyList(), null)
+        assertEquals(BlockReason.INTERNATIONAL, (d as CallDecision.Block).reason)
+    }
+
+    @Test
+    fun `numero brasileiro com +55 nao e internacional`() {
+        val normalized = PhoneNumbers.normalize("+55 11 99999-8888")
+        val d = CallDecisionEngine.decide(call(normalized), defaults.copy(blockInternational = true), emptyList(), null)
+        assertTrue(d is CallDecision.Allow)
+    }
+
+    @Test
+    fun `contato internacional continua tocando`() {
+        val d = CallDecisionEngine.decide(
+            call("+12125551234", contact = "Tia nos EUA"), defaults.copy(blockInternational = true), emptyList(), null,
+        )
+        assertEquals(CallDecision.Allow("Tia nos EUA"), d)
+    }
 }

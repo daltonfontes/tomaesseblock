@@ -2,12 +2,21 @@ package com.tomaesseblock.domain
 
 enum class RuleType { EXACT, PREFIX }
 
-/** Regra de bloqueio criada pelo usuário. [pattern] já está normalizado. */
+/** O que fazer com quem casa com a regra. */
+enum class RuleAction {
+    BLOCK,
+
+    /** Lista de permitidos: sempre toca, por cima de qualquer bloqueio. */
+    ALLOW,
+}
+
+/** Regra criada pelo usuário. [pattern] já está normalizado. */
 data class BlockRule(
     val id: Long = 0,
     val pattern: String,
     val type: RuleType,
     val label: String = "",
+    val action: RuleAction = RuleAction.BLOCK,
 )
 
 enum class SpamCategory(val label: String) {
@@ -37,6 +46,15 @@ data class BlockSettings(
     // só fica registrada como "bloqueada" no histórico do telefone e no histórico do app.
     val showCallerId: Boolean = false,
     val notifyBlocked: Boolean = false,
+    /** Bloqueia ligações de números internacionais (+1, +44, +62…). */
+    val blockInternational: Boolean = false,
+    /**
+     * Deixa tocar quem ligou de novo poucos minutos depois de ser bloqueado — rede de segurança
+     * para os bloqueios amplos (fora dos contatos, internacionais, prefixos).
+     */
+    val allowRepeatedCalls: Boolean = true,
+    /** Categorias de denúncia que levam ao bloqueio; as demais só identificam. */
+    val blockedSpamCategories: Set<SpamCategory> = SpamCategory.entries.toSet(),
 )
 
 enum class BlockReason(val label: String) {
@@ -46,6 +64,15 @@ enum class BlockReason(val label: String) {
     NOT_IN_CONTACTS("Fora dos contatos"),
     TELEMARKETING_0303("Telemarketing (0303)"),
     SPAM_REPORTED("Denunciado como spam"),
+    INTERNATIONAL("Ligação internacional"),
+    ;
+
+    /**
+     * Bloqueios amplos, que pegam números que o usuário nunca escolheu individualmente.
+     * Só esses podem ser liberados pela exceção de "ligou de novo".
+     */
+    val isBroad: Boolean
+        get() = this == NOT_IN_CONTACTS || this == INTERNATIONAL || this == PREFIX
 }
 
 sealed interface CallDecision {
