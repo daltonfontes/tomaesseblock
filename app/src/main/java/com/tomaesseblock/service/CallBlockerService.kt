@@ -10,10 +10,6 @@ import com.tomaesseblock.domain.CallDecision
 import com.tomaesseblock.domain.CallDecisionEngine
 import com.tomaesseblock.domain.IncomingCall
 import com.tomaesseblock.domain.PhoneNumbers
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -24,15 +20,17 @@ import kotlinx.coroutines.withTimeoutOrNull
  */
 class CallBlockerService : CallScreeningService() {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     override fun onScreenCall(callDetails: Call.Details) {
         if (callDetails.callDirection != Call.Details.DIRECTION_INCOMING) {
             respondToCall(callDetails, CallResponse.Builder().build())
             return
         }
 
-        scope.launch {
+        val container = (application as TomaEsseBlockApp).container
+        val appContext = applicationContext
+        // Escopo da aplicação, não do serviço: o sistema desliga o serviço logo após a resposta,
+        // e isso não pode cancelar a gravação no histórico.
+        container.appScope.launch {
             val rawNumber = callDetails.handle?.schemeSpecificPart.orEmpty()
             val normalized = PhoneNumbers.normalize(rawNumber)
             // O sistema espera a resposta em poucos segundos; em caso de demora, deixa tocar.
@@ -45,15 +43,16 @@ class CallBlockerService : CallScreeningService() {
             respondToCall(callDetails, decision.toResponse())
             Log.i(TAG, "Chamada de ${normalized.ifEmpty { "oculto" }}: $decision")
 
-            val app = application as TomaEsseBlockApp
-            val settings = app.container.settings.current()
-            app.container.repository.record(normalized, decision)
+            runCatching { container.repository.record(normalized, decision) }
+                .onFailure { Log.e(TAG, "Falha ao gravar no histórico", it) }
+
+            val settings = container.settings.current()
             when (decision) {
                 is CallDecision.Block ->
-                    if (settings.notifyBlocked) Notifications.showBlocked(this@CallBlockerService, normalized, decision)
+                    if (settings.notifyBlocked) Notifications.showBlocked(appContext, normalized, decision)
                 is CallDecision.Allow ->
                     if (settings.showCallerId && decision.isSuspicious && decision.identification != null) {
-                        Notifications.showCallerId(this@CallBlockerService, normalized, decision.identification)
+                        Notifications.showCallerId(appContext, normalized, decision.identification)
                     }
             }
         }
@@ -87,11 +86,6 @@ class CallBlockerService : CallScreeningService() {
             .setSkipNotification(true)
             .build()
         is CallDecision.Allow -> CallResponse.Builder().build()
-    }
-
-    override fun onDestroy() {
-        scope.cancel()
-        super.onDestroy()
     }
 
     private companion object {
