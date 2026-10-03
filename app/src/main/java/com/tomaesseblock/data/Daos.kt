@@ -21,8 +21,11 @@ interface BlockRuleDao {
     @Delete
     suspend fun delete(rule: BlockRuleEntity)
 
-    @Query("DELETE FROM block_rules WHERE pattern = :pattern AND type = 'EXACT'")
-    suspend fun deleteExact(pattern: String)
+    @Query("DELETE FROM block_rules WHERE pattern = :pattern AND type = 'EXACT' AND `action` = :action")
+    suspend fun deleteExact(pattern: String, action: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(rules: List<BlockRuleEntity>)
 }
 
 @Dao
@@ -38,6 +41,15 @@ interface SpamReportDao {
 
     @Query("DELETE FROM spam_reports WHERE number = :number")
     suspend fun clear(number: String)
+
+    @Query("SELECT * FROM spam_reports ORDER BY created_at")
+    suspend fun getAll(): List<SpamReportEntity>
+
+    @Query(
+        "SELECT COUNT(*) FROM spam_reports WHERE number = :number AND category = :category " +
+            "AND created_at = :createdAt",
+    )
+    suspend fun countSame(number: String, category: String, createdAt: Long): Int
 
     @Query("SELECT COUNT(DISTINCT number) FROM spam_reports")
     fun observeReportedNumbers(): Flow<Int>
@@ -56,6 +68,10 @@ interface CallEventDao {
 
     @Insert
     suspend fun insert(event: CallEventEntity): Long
+
+    /** Bloqueios deste número desde [since] — usado pela exceção "ligou de novo". */
+    @Query("SELECT COUNT(*) FROM call_events WHERE number = :number AND blocked = 1 AND timestamp >= :since")
+    suspend fun countBlockedSince(number: String, since: Long): Int
 
     @Query("DELETE FROM call_events")
     suspend fun clear()

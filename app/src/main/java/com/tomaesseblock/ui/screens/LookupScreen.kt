@@ -50,6 +50,30 @@ import com.tomaesseblock.ui.theme.Warning
 @Composable
 fun LookupScreen(vm: MainViewModel) {
     val result by vm.lookup.collectAsState()
+    LookupContent(
+        result = result,
+        onLookup = vm::lookup,
+        onBlock = vm::blockFromLookup,
+        onUnblock = vm::unblockFromLookup,
+        onReport = vm::report,
+        onClearReports = vm::clearReports,
+        onAllow = vm::allowFromLookup,
+        onRemoveAllowed = vm::removeAllowedFromLookup,
+    )
+}
+
+/** Visual da busca de número, sem ViewModel (usado também nas capturas de tela). */
+@Composable
+fun LookupContent(
+    result: LookupResult?,
+    onLookup: (String) -> Unit,
+    onBlock: () -> Unit,
+    onUnblock: () -> Unit,
+    onReport: (SpamCategory) -> Unit,
+    onClearReports: () -> Unit,
+    onAllow: () -> Unit,
+    onRemoveAllowed: () -> Unit,
+) {
     var query by remember { mutableStateOf(result?.number.orEmpty()) }
     var showReport by remember { mutableStateOf(false) }
 
@@ -65,9 +89,9 @@ fun LookupScreen(vm: MainViewModel) {
             label = { Text("Número de telefone") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { vm.lookup(query) }),
+            keyboardActions = KeyboardActions(onSearch = { onLookup(query) }),
             trailingIcon = {
-                IconButton(onClick = { vm.lookup(query) }) { Icon(Icons.Filled.Search, contentDescription = "Buscar") }
+                IconButton(onClick = { onLookup(query) }) { Icon(Icons.Filled.Search, contentDescription = "Buscar") }
             },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         )
@@ -79,18 +103,27 @@ fun LookupScreen(vm: MainViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (r.isBlockedExact) {
-                    OutlinedButton(onClick = vm::unblockFromLookup, modifier = Modifier.weight(1f)) { Text("Desbloquear") }
+                    OutlinedButton(onClick = onUnblock, modifier = Modifier.weight(1f)) { Text("Desbloquear") }
                 } else {
                     Button(
-                        onClick = vm::blockFromLookup,
+                        onClick = onBlock,
                         colors = ButtonDefaults.buttonColors(containerColor = Danger),
                         modifier = Modifier.weight(1f),
                     ) { Text("Bloquear") }
                 }
                 OutlinedButton(onClick = { showReport = true }, modifier = Modifier.weight(1f)) { Text("Denunciar") }
             }
+            if (r.isAllowedExact) {
+                TextButton(onClick = onRemoveAllowed, modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Text("Remover dos permitidos")
+                }
+            } else {
+                TextButton(onClick = onAllow, modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Text("Sempre permitir este número")
+                }
+            }
             if (r.spam != null) {
-                TextButton(onClick = vm::clearReports, modifier = Modifier.padding(horizontal = 8.dp)) {
+                TextButton(onClick = onClearReports, modifier = Modifier.padding(horizontal = 8.dp)) {
                     Text("Não é spam (remover denúncias)")
                 }
             }
@@ -101,7 +134,7 @@ fun LookupScreen(vm: MainViewModel) {
         ReportDialog(
             onDismiss = { showReport = false },
             onConfirm = {
-                vm.report(it)
+                onReport(it)
                 showReport = false
             },
         )
@@ -111,6 +144,7 @@ fun LookupScreen(vm: MainViewModel) {
 @Composable
 private fun ResultCard(r: LookupResult) {
     val (color, verdict) = when {
+        r.isAllowedExact -> Safe to "Na sua lista de permitidos — sempre toca"
         r.decision is CallDecision.Block -> Danger to "Será bloqueado: ${r.decision.label}"
         r.spam != null -> Warning to "Suspeito — será identificado, mas não bloqueado"
         else -> Safe to "Sem denúncias — chamada permitida"
@@ -135,7 +169,7 @@ private fun ResultCard(r: LookupResult) {
 }
 
 @Composable
-private fun ReportDialog(onDismiss: () -> Unit, onConfirm: (SpamCategory) -> Unit) {
+internal fun ReportDialog(onDismiss: () -> Unit, onConfirm: (SpamCategory) -> Unit) {
     var selected by remember { mutableStateOf(SpamCategory.TELEMARKETING) }
     AlertDialog(
         onDismissRequest = onDismiss,

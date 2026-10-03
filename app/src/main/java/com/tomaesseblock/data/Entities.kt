@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.tomaesseblock.domain.BlockRule
+import com.tomaesseblock.domain.RuleAction
 import com.tomaesseblock.domain.RuleType
 
 @Entity(
@@ -18,8 +19,16 @@ data class BlockRuleEntity(
     val type: String,
     val label: String,
     @ColumnInfo(name = "created_at") val createdAt: Long = System.currentTimeMillis(),
+    /** Nome do enum [RuleAction]; adicionada na versão 2 do banco (ver [AppDatabase.MIGRATION_1_2]). */
+    val action: String = RuleAction.BLOCK.name,
 ) {
-    fun toDomain() = BlockRule(id = id, pattern = pattern, type = RuleType.valueOf(type), label = label)
+    fun toDomain() = BlockRule(
+        id = id,
+        pattern = pattern,
+        type = RuleType.valueOf(type),
+        label = label,
+        action = runCatching { RuleAction.valueOf(action) }.getOrDefault(RuleAction.BLOCK),
+    )
 }
 
 @Entity(tableName = "spam_reports", indices = [Index("number")])

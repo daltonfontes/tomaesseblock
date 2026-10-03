@@ -35,28 +35,61 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tomaesseblock.domain.BlockRule
 import com.tomaesseblock.domain.PhoneNumbers
+import com.tomaesseblock.domain.RuleAction
 import com.tomaesseblock.domain.RuleType
 import com.tomaesseblock.ui.MainViewModel
 
 @Composable
 fun BlockListScreen(vm: MainViewModel) {
     val rules by vm.rules.collectAsState()
+    BlockListContent(rules = rules, onRemove = vm::removeRule, onAdd = vm::addRule)
+}
+
+/** Visual das listas de bloqueio e de permitidos, sem ViewModel (usado também nas capturas de tela). */
+@Composable
+fun BlockListContent(
+    rules: List<BlockRule>,
+    onRemove: (BlockRule) -> Unit,
+    onAdd: (number: String, type: RuleType, label: String, action: RuleAction) -> Unit,
+    initialAction: RuleAction = RuleAction.BLOCK,
+) {
     var showAdd by remember { mutableStateOf(false) }
+    var action by remember { mutableStateOf(initialAction) }
+    val visible = rules.filter { it.action == action }
+    val blocking = action == RuleAction.BLOCK
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
-            ScreenTitle("Lista de bloqueio")
-            if (rules.isEmpty()) {
+            ScreenTitle(if (blocking) "Lista de bloqueio" else "Sempre permitir")
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                RuleAction.entries.forEachIndexed { index, a ->
+                    SegmentedButton(
+                        selected = action == a,
+                        onClick = { action = a },
+                        shape = SegmentedButtonDefaults.itemShape(index, RuleAction.entries.size),
+                    ) {
+                        val count = rules.count { it.action == a }
+                        Text("${if (a == RuleAction.BLOCK) "Bloqueados" else "Permitidos"} ($count)")
+                    }
+                }
+            }
+            if (visible.isEmpty()) {
                 Text(
-                    "Nenhum número bloqueado ainda.\nToque em \"Adicionar\" para bloquear um número ou um prefixo " +
-                        "(ex.: 0303 para todo telemarketing, ou um DDD inteiro).",
+                    if (blocking) {
+                        "Nenhum número bloqueado ainda.\nToque em \"Adicionar\" para bloquear um número ou um " +
+                            "prefixo (ex.: 0303 para todo telemarketing, ou um DDD inteiro)."
+                    } else {
+                        "Números aqui sempre tocam, mesmo com bloqueios ligados — útil para quem não está nos " +
+                            "seus contatos, como médico, escola ou entregas."
+                    },
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
             LazyColumn(Modifier.fillMaxSize()) {
-                items(rules, key = { it.id }) { rule ->
+                items(visible, key = { it.id }) { rule ->
                     ListItem(
                         headlineContent = {
                             Text(
@@ -76,7 +109,7 @@ fun BlockListScreen(vm: MainViewModel) {
                             )
                         },
                         trailingContent = {
-                            IconButton(onClick = { vm.removeRule(rule) }) {
+                            IconButton(onClick = { onRemove(rule) }) {
                                 Icon(Icons.Filled.Delete, contentDescription = "Remover")
                             }
                         },
@@ -95,9 +128,10 @@ fun BlockListScreen(vm: MainViewModel) {
 
     if (showAdd) {
         AddRuleDialog(
+            action = action,
             onDismiss = { showAdd = false },
             onConfirm = { number, type, label ->
-                vm.addRule(number, type, label)
+                onAdd(number, type, label, action)
                 showAdd = false
             },
         )
@@ -105,14 +139,19 @@ fun BlockListScreen(vm: MainViewModel) {
 }
 
 @Composable
-private fun AddRuleDialog(onDismiss: () -> Unit, onConfirm: (String, RuleType, String) -> Unit) {
+private fun AddRuleDialog(
+    action: RuleAction,
+    onDismiss: () -> Unit,
+    onConfirm: (String, RuleType, String) -> Unit,
+) {
     var number by remember { mutableStateOf("") }
     var label by remember { mutableStateOf("") }
     var type by remember { mutableStateOf(RuleType.EXACT) }
+    val verb = if (action == RuleAction.BLOCK) "Bloquear" else "Sempre permitir"
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Bloquear") },
+        title = { Text(verb) },
         text = {
             Column {
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
@@ -143,7 +182,7 @@ private fun AddRuleDialog(onDismiss: () -> Unit, onConfirm: (String, RuleType, S
                     Row(Modifier.padding(top = 8.dp)) {
                         Text(
                             "O prefixo é comparado com o número sem +55 e sem código de operadora. " +
-                                "Ex.: \"11\" bloqueia todo o DDD 11.",
+                                "Ex.: \"11\" vale para todo o DDD 11.",
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -154,7 +193,7 @@ private fun AddRuleDialog(onDismiss: () -> Unit, onConfirm: (String, RuleType, S
             TextButton(
                 onClick = { onConfirm(number, type, label) },
                 enabled = number.any { it.isDigit() },
-            ) { Text("Bloquear") }
+            ) { Text(verb) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
     )

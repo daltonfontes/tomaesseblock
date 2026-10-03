@@ -106,7 +106,39 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
         )
     }
 
-    val protectedNow = hasRole && settings.blockingEnabled
+    HomeContent(
+        blockingEnabled = settings.blockingEnabled,
+        today = today,
+        total = total,
+        reported = reported,
+        hasRole = hasRole,
+        hasContacts = hasContacts,
+        hasNotifications = hasNotifications,
+        onActivateRole = {
+            val rm = context.getSystemService(RoleManager::class.java)
+            roleLauncher.launch(rm.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING))
+        },
+        // Explica o uso dos dados antes do pedido do sistema (exigência do Google Play).
+        onRequestPermissions = { showDisclosure = true },
+        onOpenLookup = onOpenLookup,
+    )
+}
+
+/** Visual da tela inicial, sem dependências do sistema (usado também nas capturas de tela). */
+@Composable
+fun HomeContent(
+    blockingEnabled: Boolean,
+    today: Int,
+    total: Int,
+    reported: Int,
+    hasRole: Boolean,
+    hasContacts: Boolean,
+    hasNotifications: Boolean,
+    onActivateRole: () -> Unit,
+    onRequestPermissions: () -> Unit,
+    onOpenLookup: () -> Unit,
+) {
+    val protectedNow = hasRole && blockingEnabled
 
     Column(
         Modifier
@@ -138,7 +170,7 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
                     Text(
                         when {
                             !hasRole -> "Defina o app como identificador de chamadas e spam."
-                            !settings.blockingEnabled -> "O bloqueio está desligado nos ajustes."
+                            !blockingEnabled -> "O bloqueio está desligado nos ajustes."
                             else -> "Chamadas indesejadas serão bloqueadas automaticamente."
                         },
                         style = MaterialTheme.typography.bodyMedium,
@@ -149,18 +181,14 @@ fun HomeScreen(vm: MainViewModel, onOpenLookup: () -> Unit) {
 
         if (!hasRole) {
             Button(
-                onClick = {
-                    val rm = context.getSystemService(RoleManager::class.java)
-                    roleLauncher.launch(rm.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING))
-                },
+                onClick = onActivateRole,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             ) { Text("Ativar bloqueio de chamadas") }
         }
 
         if (!hasContacts || !hasNotifications) {
             OutlinedButton(
-                // Explica o uso dos dados antes do pedido do sistema (exigência do Google Play).
-                onClick = { showDisclosure = true },
+                onClick = onRequestPermissions,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             ) {
                 Text(

@@ -1,5 +1,7 @@
 package com.tomaesseblock.ui
 
+import android.widget.Toast
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
@@ -13,8 +15,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -28,7 +32,7 @@ import com.tomaesseblock.ui.screens.HomeScreen
 import com.tomaesseblock.ui.screens.LookupScreen
 import com.tomaesseblock.ui.screens.SettingsScreen
 
-private enum class Tab(val route: String, val label: String, val icon: ImageVector) {
+internal enum class Tab(val route: String, val label: String, val icon: ImageVector) {
     HOME("home", "Início", Icons.Filled.Shield),
     BLOCKLIST("blocklist", "Bloqueios", Icons.Filled.Block),
     HISTORY("history", "Histórico", Icons.Filled.History),
@@ -39,6 +43,10 @@ private enum class Tab(val route: String, val label: String, val icon: ImageVect
 @Composable
 fun TomaEsseBlockRoot(vm: MainViewModel = viewModel(factory = MainViewModel.Factory)) {
     val nav = rememberNavController()
+    val context = LocalContext.current
+    LaunchedEffect(vm) {
+        vm.messages.collect { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+    }
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
@@ -48,20 +56,7 @@ fun TomaEsseBlockRoot(vm: MainViewModel = viewModel(factory = MainViewModel.Fact
         restoreState = true
     }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                Tab.entries.forEach { tab ->
-                    NavigationBarItem(
-                        selected = currentRoute == tab.route,
-                        onClick = { go(tab.route) },
-                        icon = { Icon(tab.icon, contentDescription = null) },
-                        label = { Text(tab.label) },
-                    )
-                }
-            }
-        },
-    ) { padding ->
+    AppScaffold(currentRoute = currentRoute, onTabSelected = { go(it.route) }) { padding ->
         NavHost(nav, startDestination = Tab.HOME.route, modifier = Modifier.padding(padding)) {
             composable(Tab.HOME.route) { HomeScreen(vm, onOpenLookup = { go(Tab.LOOKUP.route) }) }
             composable(Tab.BLOCKLIST.route) { BlockListScreen(vm) }
@@ -75,4 +70,28 @@ fun TomaEsseBlockRoot(vm: MainViewModel = viewModel(factory = MainViewModel.Fact
             composable(Tab.SETTINGS.route) { SettingsScreen(vm) }
         }
     }
+}
+
+/** Estrutura com a barra de navegação inferior; reaproveitada nas capturas de tela. */
+@Composable
+internal fun AppScaffold(
+    currentRoute: String?,
+    onTabSelected: (Tab) -> Unit,
+    content: @Composable (PaddingValues) -> Unit,
+) {
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                Tab.entries.forEach { tab ->
+                    NavigationBarItem(
+                        selected = currentRoute == tab.route,
+                        onClick = { onTabSelected(tab) },
+                        icon = { Icon(tab.icon, contentDescription = null) },
+                        label = { Text(tab.label) },
+                    )
+                }
+            }
+        },
+        content = content,
+    )
 }
