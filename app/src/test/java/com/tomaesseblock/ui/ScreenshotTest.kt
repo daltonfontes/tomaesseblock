@@ -38,7 +38,7 @@ class ScreenshotTest {
     @Before
     fun fixedLocale() {
         // Datas do histórico sempre no formato brasileiro, independentemente da máquina do CI.
-        Locale.setDefault(Locale("pt", "BR"))
+        Locale.setDefault(Locale.forLanguageTag("pt-BR"))
         TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"))
     }
 
