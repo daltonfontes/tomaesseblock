@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.tomaesseblock.ui.MainViewModel
 import kotlin.math.roundToInt
 
-const val PRIVACY_POLICY_URL = "https://github.com/daltonfontes/tomaesseblock/blob/main/PRIVACY.md"
+const val PRIVACY_POLICY_URL = "https://daltonfontes.github.io/tomaesseblock/privacidade.html"
 
 @Composable
 fun SettingsScreen(vm: MainViewModel) {

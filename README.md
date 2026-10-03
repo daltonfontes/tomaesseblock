@@ -70,9 +70,15 @@ com `versionCode` igual ao número da execução. Para ele sair **assinado** com
    - `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS` (`upload`) e `RELEASE_KEY_PASSWORD`
 3. Envie o `.aab` no Play Console com o *Play App Signing* ativado.
 
-Também é preciso, no Play Console: link da [política de privacidade](PRIVACY.md), formulário de
+Também é preciso, no Play Console: link da [política de privacidade](https://daltonfontes.github.io/tomaesseblock/privacidade.html), formulário de
 *Segurança dos dados* (contatos usados só no aparelho, nada coletado ou compartilhado), ícone
 512×512, imagem de destaque 1024×500 e capturas de tela.
+
+### Site e política de privacidade (GitHub Pages)
+
+A pasta `docs/` tem o site do app e a política de privacidade, publicados em
+<https://daltonfontes.github.io/tomaesseblock/privacidade.html>. Para ativar (uma vez só): *Settings → Pages → Build and deployment → Source:
+Deploy from a branch → Branch: `main` / pasta `/docs`*.
 
 ## Próximos passos
 
