@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.tomaesseblock.data.CallEventEntity
 import com.tomaesseblock.domain.PhoneNumbers
 import com.tomaesseblock.ui.MainViewModel
 import com.tomaesseblock.ui.theme.Danger
@@ -35,13 +36,19 @@ import java.util.Date
 @Composable
 fun HistoryScreen(vm: MainViewModel, onOpenNumber: (String) -> Unit) {
     val history by vm.history.collectAsState()
+    HistoryContent(history = history, onClear = vm::clearHistory, onOpenNumber = onOpenNumber)
+}
+
+/** Visual do histórico, sem ViewModel (usado também nas capturas de tela). */
+@Composable
+fun HistoryContent(history: List<CallEventEntity>, onClear: () -> Unit, onOpenNumber: (String) -> Unit) {
     val formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             ScreenTitle("Histórico", Modifier.weight(1f))
             if (history.isNotEmpty()) {
-                TextButton(onClick = vm::clearHistory, modifier = Modifier.padding(end = 8.dp)) { Text("Limpar") }
+                TextButton(onClick = onClear, modifier = Modifier.padding(end = 8.dp)) { Text("Limpar") }
             }
         }
         if (history.isEmpty()) {

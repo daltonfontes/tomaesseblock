@@ -48,9 +48,11 @@ Requisitos: Android Studio (Ladybug ou mais novo) / JDK 17 / Android SDK 35.
 ```bash
 ./gradlew testDebugUnitTest   # testes unitários
 ./gradlew assembleDebug       # gera app/build/outputs/apk/debug/app-debug.apk
+./gradlew recordPaparazziDebug # capturas de tela em app/src/test/snapshots/images/
 ```
 
-O GitHub Actions (`.github/workflows/android.yml`) roda os testes e publica o APK de debug como artefato a cada push.
+O GitHub Actions (`.github/workflows/android.yml`) roda os testes e publica como artefatos, a cada push, o APK de debug,
+o pacote `.aab` de release e as capturas de tela de todas as abas (tema claro e escuro, `tomaesseblock-screenshots`).
 
 No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Esse Block* como app de identificação de chamadas e spam → permita contatos e notificações.
 

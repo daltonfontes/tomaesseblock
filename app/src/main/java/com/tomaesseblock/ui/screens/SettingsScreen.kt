@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.tomaesseblock.domain.BlockSettings
 import com.tomaesseblock.ui.MainViewModel
 import kotlin.math.roundToInt
 
@@ -27,9 +28,25 @@ const val PRIVACY_POLICY_URL = "https://daltonfontes.github.io/tomaesseblock/pri
 
 @Composable
 fun SettingsScreen(vm: MainViewModel) {
-    val s by vm.settings.collectAsState()
+    val settings by vm.settings.collectAsState()
     val context = LocalContext.current
+    SettingsContent(
+        s = settings,
+        onUpdate = vm::updateSettings,
+        onOpenPrivacyPolicy = {
+            // Sem navegador instalado, simplesmente não abre.
+            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))) }
+        },
+    )
+}
 
+/** Visual dos ajustes, sem ViewModel (usado também nas capturas de tela). */
+@Composable
+fun SettingsContent(
+    s: BlockSettings,
+    onUpdate: ((BlockSettings) -> BlockSettings) -> Unit,
+    onOpenPrivacyPolicy: () -> Unit,
+) {
     Column(
         Modifier
             .fillMaxSize()
@@ -38,15 +55,15 @@ fun SettingsScreen(vm: MainViewModel) {
         ScreenTitle("Ajustes")
 
         SwitchRow("Bloqueio ativado", "Liga/desliga todo o bloqueio automático", s.blockingEnabled) { v ->
-            vm.updateSettings { it.copy(blockingEnabled = v) }
+            onUpdate { it.copy(blockingEnabled = v) }
         }
         HorizontalDivider()
         SectionHeader("O que bloquear")
         SwitchRow("Telemarketing (0303)", "Prefixo obrigatório da Anatel para telemarketing", s.blockTelemarketing0303) { v ->
-            vm.updateSettings { it.copy(blockTelemarketing0303 = v) }
+            onUpdate { it.copy(blockTelemarketing0303 = v) }
         }
         SwitchRow("Números denunciados", "Bloqueia números com denúncias de spam", s.blockReportedSpam) { v ->
-            vm.updateSettings { it.copy(blockReportedSpam = v) }
+            onUpdate { it.copy(blockReportedSpam = v) }
         }
         if (s.blockReportedSpam) {
             Column(Modifier.padding(horizontal = 16.dp)) {
@@ -56,28 +73,28 @@ fun SettingsScreen(vm: MainViewModel) {
                 )
                 Slider(
                     value = s.spamThreshold.toFloat(),
-                    onValueChange = { v -> vm.updateSettings { it.copy(spamThreshold = v.roundToInt()) } },
+                    onValueChange = { v -> onUpdate { it.copy(spamThreshold = v.roundToInt()) } },
                     valueRange = 1f..5f,
                     steps = 3,
                 )
             }
         }
         SwitchRow("Números ocultos", "Chamadas sem identificação", s.blockHidden) { v ->
-            vm.updateSettings { it.copy(blockHidden = v) }
+            onUpdate { it.copy(blockHidden = v) }
         }
         SwitchRow(
             "Quem não está nos contatos",
             "Modo rigoroso: só seus contatos conseguem ligar (requer permissão de contatos)",
             s.blockNotInContacts,
-        ) { v -> vm.updateSettings { it.copy(blockNotInContacts = v) } }
+        ) { v -> onUpdate { it.copy(blockNotInContacts = v) } }
 
         HorizontalDivider()
         SectionHeader("Avisos")
         SwitchRow("Identificador de chamadas", "Notificação de possível spam para chamadas suspeitas que não foram bloqueadas", s.showCallerId) { v ->
-            vm.updateSettings { it.copy(showCallerId = v) }
+            onUpdate { it.copy(showCallerId = v) }
         }
         SwitchRow("Notificar bloqueios", "Aviso a cada bloqueio. Desligado, a chamada só aparece no histórico do telefone", s.notifyBlocked) { v ->
-            vm.updateSettings { it.copy(notifyBlocked = v) }
+            onUpdate { it.copy(notifyBlocked = v) }
         }
 
         HorizontalDivider()
@@ -85,10 +102,7 @@ fun SettingsScreen(vm: MainViewModel) {
         ListItem(
             headlineContent = { Text("Política de privacidade") },
             supportingContent = { Text("Nenhum dado sai do seu aparelho") },
-            modifier = Modifier.clickable {
-                // Sem navegador instalado, simplesmente não abre.
-                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))) }
-            },
+            modifier = Modifier.clickable(onClick = onOpenPrivacyPolicy),
         )
     }
 }

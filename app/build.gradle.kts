@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    // Capturas de tela das telas em Compose, geradas em testes JVM (sem emulador).
+    alias(libs.plugins.paparazzi)
 }
 
 android {

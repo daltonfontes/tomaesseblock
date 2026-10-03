@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.tomaesseblock.domain.BlockRule
 import com.tomaesseblock.domain.PhoneNumbers
 import com.tomaesseblock.domain.RuleType
 import com.tomaesseblock.ui.MainViewModel
@@ -42,6 +43,16 @@ import com.tomaesseblock.ui.MainViewModel
 @Composable
 fun BlockListScreen(vm: MainViewModel) {
     val rules by vm.rules.collectAsState()
+    BlockListContent(rules = rules, onRemove = vm::removeRule, onAdd = vm::addRule)
+}
+
+/** Visual da lista de bloqueio, sem ViewModel (usado também nas capturas de tela). */
+@Composable
+fun BlockListContent(
+    rules: List<BlockRule>,
+    onRemove: (BlockRule) -> Unit,
+    onAdd: (number: String, type: RuleType, label: String) -> Unit,
+) {
     var showAdd by remember { mutableStateOf(false) }
 
     Box(Modifier.fillMaxSize()) {
@@ -76,7 +87,7 @@ fun BlockListScreen(vm: MainViewModel) {
                             )
                         },
                         trailingContent = {
-                            IconButton(onClick = { vm.removeRule(rule) }) {
+                            IconButton(onClick = { onRemove(rule) }) {
                                 Icon(Icons.Filled.Delete, contentDescription = "Remover")
                             }
                         },
@@ -97,7 +108,7 @@ fun BlockListScreen(vm: MainViewModel) {
         AddRuleDialog(
             onDismiss = { showAdd = false },
             onConfirm = { number, type, label ->
-                vm.addRule(number, type, label)
+                onAdd(number, type, label)
                 showAdd = false
             },
         )

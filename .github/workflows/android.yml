@@ -33,6 +33,15 @@ jobs:
           name: tomaesseblock-debug-apk
           path: app/build/outputs/apk/debug/*.apk
 
+      # Capturas de tela de todas as abas (tema claro e escuro), sem emulador.
+      - name: Capturas de tela (Paparazzi)
+        run: ./gradlew recordPaparazziDebug --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tomaesseblock-screenshots
+          path: app/src/test/snapshots/images/*.png
+
       # Chave de upload do Play guardada nos secrets do repositório (opcional).
       # Sem os secrets, o pacote .aab é gerado sem assinatura.
       - name: Preparar chave de assinatura

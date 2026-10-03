@@ -9,3 +9,6 @@ build/
 .cxx
 *.apk
 *.aab
+
+# Capturas do Paparazzi: geradas no CI, não versionadas
+app/src/test/snapshots/
