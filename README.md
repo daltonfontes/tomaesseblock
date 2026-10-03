@@ -66,19 +66,40 @@ No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Ess
 
 > Observação: quando o app não é o discador padrão, o Android só consulta o serviço para números **fora** da agenda — o que é justamente o caso de spam.
 
+## Versões
+
+- **Versão a lançar:** `appVersion` no `gradle.properties` (hoje `1.0.0`).
+- **`versionCode`:** calculado da versão, `major × 10000 + minor × 100 + patch` (1.0.0 → 10000, 1.2.3 → 10203).
+  Sempre cresce junto com a versão, como o Play exige. `minor` e `patch` vão de 0 a 99.
+- **Builds de cada push (CI) e do Android Studio:** `versionName` = `1.0.0-dev+<execução>`, para não serem confundidos
+  com um lançamento. Não envie esses para o Play.
+- A versão instalada aparece em **Ajustes → Sobre**.
+
 ## Publicar no Google Play
 
-O CI gera, a cada push, o pacote `tomaesseblock-release-aab` (aba *Actions* → execução → *Artifacts*),
-com `versionCode` igual ao número da execução. Para ele sair **assinado** com a sua chave de upload:
-
-1. Crie a chave (uma vez só, e guarde o arquivo e as senhas em local seguro):
+### Uma vez só: chave de upload
+1. Crie a chave (guarde o arquivo e as senhas em local seguro; perder a chave complica as atualizações):
    ```bash
    keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
    ```
 2. Em *Settings → Secrets and variables → Actions* do repositório, crie os secrets:
    - `RELEASE_KEYSTORE_BASE64` — saída de `base64 -w0 upload.jks`
    - `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS` (`upload`) e `RELEASE_KEY_PASSWORD`
-3. Envie o `.aab` no Play Console com o *Play App Signing* ativado.
+3. No Play Console, ative o *Play App Signing*.
+
+### A cada lançamento
+1. Atualize `appVersion` no `gradle.properties` (ex.: `1.0.1` para correções, `1.1.0` para novidades) e faça o merge na `main`.
+2. Crie e envie a tag com a mesma versão:
+   ```bash
+   git checkout main && git pull
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+   (ou pelo GitHub: *Releases → Draft a new release → Choose a tag → `v1.0.0`*).
+3. O workflow **Release** (`.github/workflows/release.yml`) roda os testes, gera o `.aab` e o `.apk` assinados e cria o
+   Release no GitHub com os dois anexados. Se a tag não bater com `appVersion`, ou se faltarem os secrets, ele falha
+   avisando o motivo.
+4. Envie o `tomaesseblock-v1.0.0.aab` no Play Console.
 
 Também é preciso, no Play Console: link da [política de privacidade](https://daltonfontes.github.io/tomaesseblock/privacidade.html), formulário de
 *Segurança dos dados* (contatos usados só no aparelho, nada coletado ou compartilhado), ícone

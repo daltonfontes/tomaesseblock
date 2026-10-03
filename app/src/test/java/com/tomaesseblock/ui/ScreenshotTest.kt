@@ -105,7 +105,12 @@ class ScreenshotTest {
 
     @Test
     fun ajustes() = shotBothThemes(Tab.SETTINGS) {
-        SettingsContent(s = BlockSettings(), onUpdate = {}, onOpenPrivacyPolicy = {})
+        SettingsContent(
+            s = BlockSettings(),
+            onUpdate = {},
+            onOpenPrivacyPolicy = {},
+            versionLabel = "1.0.0 (10000)",
+        )
     }
 
     private fun shotBothThemes(tab: Tab, content: @Composable () -> Unit) {

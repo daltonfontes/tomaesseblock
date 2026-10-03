@@ -13,6 +13,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.semantics.Role
+import com.tomaesseblock.BuildConfig
 import com.tomaesseblock.data.BackupCodec
 import com.tomaesseblock.domain.SpamCategory
 import androidx.compose.foundation.layout.Column
@@ -59,6 +60,7 @@ fun SettingsScreen(vm: MainViewModel) {
         onExport = { exportLauncher.launch("tomaesseblock-backup.json") },
         // Alguns gerenciadores de arquivos não marcam .json como application/json.
         onImport = { importLauncher.launch(arrayOf(BackupCodec.MIME_TYPE, "text/plain", "application/octet-stream")) },
+        versionLabel = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
     )
 }
 
@@ -70,6 +72,7 @@ fun SettingsContent(
     onOpenPrivacyPolicy: () -> Unit,
     onExport: () -> Unit = {},
     onImport: () -> Unit = {},
+    versionLabel: String = "",
 ) {
     Column(
         Modifier
@@ -179,6 +182,12 @@ fun SettingsContent(
             supportingContent = { Text("Nenhum dado sai do seu aparelho") },
             modifier = Modifier.clickable(onClick = onOpenPrivacyPolicy),
         )
+        if (versionLabel.isNotEmpty()) {
+            ListItem(
+                headlineContent = { Text("Versão") },
+                supportingContent = { Text(versionLabel) },
+            )
+        }
     }
 }
 

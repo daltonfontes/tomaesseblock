@@ -2,6 +2,8 @@ name: Android CI
 
 on:
   push:
+    # Tags v* são tratadas pelo release.yml.
+    branches: ["**"]
   pull_request:
 
 permissions:
@@ -11,7 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VERSION_CODE: ${{ github.run_number }}
+      # Vira o sufixo do versionName dos builds de desenvolvimento (ex.: 1.0.0-dev+27).
+      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,31 +45,7 @@ jobs:
           name: tomaesseblock-screenshots
           path: app/src/test/snapshots/images/*.png
 
-      # Chave de upload do Play guardada nos secrets do repositório (opcional).
-      # Sem os secrets, o pacote .aab é gerado sem assinatura.
-      - name: Preparar chave de assinatura
-        env:
-          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-        run: |
-          if [ -z "$RELEASE_KEYSTORE_BASE64" ]; then
-            echo "Sem chave de assinatura configurada: o .aab sairá sem assinatura."
-            exit 0
-          fi
-          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
-          echo "RELEASE_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-
-      - name: Gerar pacote para o Play (.aab)
-        env:
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+      # Valida o build de release (R8 + shrink). Sem assinatura: o pacote para o Play sai do
+      # workflow de lançamento (release.yml), disparado por uma tag v*.
+      - name: Validar pacote de release (.aab, sem assinatura)
         run: ./gradlew bundleRelease --stacktrace
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tomaesseblock-release-aab
-          path: app/build/outputs/bundle/release/*.aab
-
-      - name: Remover chave de assinatura
-        if: ${{ always() }}
-        run: rm -f "$RUNNER_TEMP/release.jks"
