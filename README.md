@@ -2,6 +2,21 @@
 
 App Android em **Kotlin** para identificar e bloquear chamadas indesejadas — inspirado no Whoscall.
 
+## Baixar para testar
+
+**[⬇️ Baixar o APK (versão mais recente)](https://github.com/daltonfontes/tomaesseblock/releases/latest/download/tomaesseblock.apk)** · [todas as versões](https://github.com/daltonfontes/tomaesseblock/releases)
+
+Requer Android 10 ou mais novo. Para instalar:
+
+1. Abra o link acima **no celular** e baixe o `tomaesseblock.apk`.
+2. Toque no arquivo baixado. Na primeira vez, o Android pede para **permitir instalar apps desta fonte**
+   (o navegador ou o gerenciador de arquivos) — permita e volte.
+3. Abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Esse Block* como app de identificação de chamadas e spam.
+
+Versões novas instalam por cima da anterior, sem perder listas nem histórico. Encontrou um problema?
+[Abra uma issue](https://github.com/daltonfontes/tomaesseblock/issues) contando o modelo do celular, a versão do
+Android e a versão do app (*Ajustes → Sobre*).
+
 ## Funcionalidades
 
 - **Bloqueio silencioso** (como no Whoscall): o telefone nem toca, nada aparece na tela e a chamada fica
