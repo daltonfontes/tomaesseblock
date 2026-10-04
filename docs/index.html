@@ -3,29 +3,268 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Toma Esse Block</title>
-  <meta name="description" content="App Android que bloqueia chamadas indesejadas em silêncio.">
-  <link rel="stylesheet" href="style.css">
+  <title>Toma Esse Block — bloqueador de chamadas para Android</title>
+  <meta name="description" content="Bloqueia em silêncio telemarketing, golpes e spam. Gratuito e 100% no seu aparelho: nenhum dado sai do celular.">
+  <meta property="og:title" content="Toma Esse Block — spam não toca mais">
+  <meta property="og:description" content="Bloqueador de chamadas para Android. Silencioso, gratuito e sem enviar seus dados para ninguém.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#1b5e20">
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
-<main>
-  <header>
-    <svg width="40" height="40" viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="currentColor" style="color: var(--accent)" d="M24,2 L44,10 L44,24 C44,36 35,45 24,48 C13,45 4,36 4,24 L4,10 Z"/>
-    </svg>
-    <h1>Toma Esse Block</h1>
-  </header>
-  <p class="meta">Bloqueador de chamadas para Android</p>
 
-  <p>Bloqueia em silêncio telemarketing (0303), números denunciados como spam e os números que você
-    escolher. O telefone nem toca: a chamada só aparece como bloqueada no histórico.</p>
+<!-- Ícones (traço simples, cor herdada do texto) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></symbol>
+    <symbol id="i-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/><path d="M3 3l18 18"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22V4"/><path d="M5 4h12l-2 4 2 4H5"/></symbol>
+    <symbol id="i-user-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M16 11l2 2 4-4"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 3"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></symbol>
+  </defs>
+</svg>
 
-  <p class="summary">Tudo funciona no seu aparelho — o app não usa a internet.</p>
+<nav class="nav">
+  <div class="wrap">
+    <a class="logo" href="#topo"><svg width="28" height="28"><use href="#i-shield"/></svg>Toma Esse Block</a>
+    <div class="nav-links">
+      <a href="#recursos">Recursos</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#privacidade">Privacidade</a>
+      <a href="#perguntas">Dúvidas</a>
+    </div>
+    <a class="btn btn-primary btn-sm" href="https://github.com/daltonfontes/tomaesseblock/releases/latest/download/tomaesseblock.apk">Baixar</a>
+  </div>
+</nav>
 
-  <ul>
-    <li><a href="privacidade.html">Política de privacidade</a></li>
-    <li><a href="https://github.com/daltonfontes/tomaesseblock">Código-fonte no GitHub</a></li>
-  </ul>
-</main>
+<header class="hero" id="topo">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Grátis · Código no GitHub · Android 10+</span>
+      <h1>Spam não toca mais. <span>Toma esse block.</span></h1>
+      <p class="lead">Telemarketing, golpes e números denunciados são recusados antes do celular tocar. Sem
+        pop-ups, sem anúncios — e sem mandar seus dados para lugar nenhum.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/daltonfontes/tomaesseblock/releases/latest/download/tomaesseblock.apk">
+          <svg width="20" height="20"><use href="#i-save"/></svg>Baixar o APK
+        </a>
+        <a class="btn btn-ghost" href="#como-funciona">Como funciona</a>
+      </div>
+      <p class="fine">Na primeira instalação, permita instalar apps desta fonte quando o Android pedir.</p>
+    </div>
+
+    <div class="phone-col">
+      <div class="phone" role="img" aria-label="Ilustração do app mostrando o histórico de chamadas bloqueadas">
+        <div class="screen">
+          <div class="screen-top"><span>14:32</span><span>●●● 4G</span></div>
+          <h3>Histórico</h3>
+          <div class="call">
+            <span class="ic"><svg width="16" height="16"><use href="#i-block"/></svg></span>
+            <div><b>0303 123 4567</b><small>Bloqueada · Telemarketing</small></div>
+            <time>14:30</time>
+          </div>
+          <div class="call">
+            <span class="ic"><svg width="16" height="16"><use href="#i-block"/></svg></span>
+            <div><b>(11) 98765-4321</b><small>Bloqueada · Golpe (3 denúncias)</small></div>
+            <time>13:12</time>
+          </div>
+          <div class="call">
+            <span class="ic ok"><svg width="16" height="16"><use href="#i-phone"/></svg></span>
+            <div><b>(11) 3322-4455</b><small>Permitida · Consultório</small></div>
+            <time>11:48</time>
+          </div>
+          <div class="call">
+            <span class="ic"><svg width="16" height="16"><use href="#i-block"/></svg></span>
+            <div><b>+44 7911 123456</b><small>Bloqueada · Internacional</small></div>
+            <time>10:05</time>
+          </div>
+          <div class="call">
+            <span class="ic"><svg width="16" height="16"><use href="#i-block"/></svg></span>
+            <div><b>Número oculto</b><small>Bloqueada</small></div>
+            <time>Ontem</time>
+          </div>
+          <div class="screen-tabs">
+            <svg width="20" height="20"><use href="#i-shield"/></svg>
+            <svg width="20" height="20"><use href="#i-block"/></svg>
+            <svg width="20" height="20" class="on"><use href="#i-history"/></svg>
+            <svg width="20" height="20"><use href="#i-search"/></svg>
+            <svg width="20" height="20"><use href="#i-gear"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="wrap">
+    <div class="stat"><strong>0</strong><span>dados enviados para servidores</span></div>
+    <div class="stat"><strong>100%</strong><span>funciona no seu aparelho</span></div>
+    <div class="stat"><strong>R$ 0</strong><span>sem assinatura e sem anúncios</span></div>
+    <div class="stat"><strong>0303</strong><span>telemarketing bloqueado de fábrica</span></div>
+  </div>
+</div>
+
+<section class="block" id="recursos">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Tudo o que você precisa para ter paz no celular</h2>
+      <p>Bloqueio inteligente, sem complicação. Você escolhe o quanto quer filtrar.</p>
+    </div>
+    <div class="features">
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-mute"/></svg></div>
+        <h3>Bloqueio silencioso</h3>
+        <p>A chamada é recusada antes de tocar e fica só no histórico do telefone, como "Bloqueada".</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-tag"/></svg></div>
+        <h3>Telemarketing 0303</h3>
+        <p>O prefixo obrigatório da Anatel para telemarketing já vem bloqueado.</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-flag"/></svg></div>
+        <h3>Denúncias de spam</h3>
+        <p>Denuncie golpes, cobranças, robôs e pesquisas, e escolha quais categorias bloquear.</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-block"/></svg></div>
+        <h3>Lista de bloqueio</h3>
+        <p>Bloqueie números ou prefixos inteiros — um DDD, um call center, o que quiser.</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-user-ok"/></svg></div>
+        <h3>Sempre permitir</h3>
+        <p>Médico, escola, entregas: quem está na lista de permitidos sempre consegue ligar.</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-repeat"/></svg></div>
+        <h3>Ligou de novo? Toca.</h3>
+        <p>Nos bloqueios mais rígidos, quem insiste em poucos minutos passa. Urgências não se perdem.</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-globe"/></svg></div>
+        <h3>Ligações internacionais</h3>
+        <p>Barre números de fora do Brasil, muito usados em golpes. É opcional.</p>
+      </article>
+      <article class="feature">
+        <div class="badge"><svg width="24" height="24"><use href="#i-save"/></svg></div>
+        <h3>Backup no seu controle</h3>
+        <p>Exporte suas listas para um arquivo e leve para o próximo celular.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block alt" id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Pronto em 1 minuto</h2>
+      <p>Usa a proteção oficial do Android para apps de bloqueio de chamadas.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Baixe e instale</h3>
+        <p>Baixe o APK e toque nele. O Android pede para permitir instalar apps desta fonte só na primeira vez.</p>
+      </div>
+      <div class="step">
+        <h3>Ative o bloqueio</h3>
+        <p>Toque em "Ativar bloqueio de chamadas" e escolha o Toma Esse Block como app de identificação de chamadas.</p>
+      </div>
+      <div class="step">
+        <h3>Esqueça o spam</h3>
+        <p>Pronto. O que for indesejado é recusado em silêncio, e você confere tudo no Histórico quando quiser.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="privacidade">
+  <div class="wrap privacy">
+    <div>
+      <h2>Sua agenda não é produto.</h2>
+      <p>Muitos apps de identificação enviam seus contatos e ligações para servidores. O Toma Esse Block
+        decide tudo dentro do celular — ele nem pede permissão de internet.</p>
+      <p><a href="privacidade.html">Leia a política de privacidade →</a></p>
+    </div>
+    <ul class="checks">
+      <li><svg width="20" height="20"><use href="#i-check"/></svg><span><b>Sem internet:</b> o app não tem permissão de acessar a rede.</span></li>
+      <li><svg width="20" height="20"><use href="#i-check"/></svg><span><b>Contatos só para consulta:</b> usados para nunca bloquear quem está na agenda; não são copiados nem guardados.</span></li>
+      <li><svg width="20" height="20"><use href="#i-check"/></svg><span><b>Sem anúncios nem rastreamento:</b> nada de ferramentas de análise.</span></li>
+      <li><svg width="20" height="20"><use href="#i-check"/></svg><span><b>Código público:</b> qualquer pessoa pode conferir no GitHub o que o app faz.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="block alt" id="perguntas">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Perguntas frequentes</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>É grátis mesmo?</summary>
+        <p>Sim. Sem assinatura, sem anúncios, e o código está público no GitHub.</p>
+      </details>
+      <details>
+        <summary>Por que baixar um APK e não pela Play Store?</summary>
+        <p>A versão da Play Store está a caminho. Enquanto isso, o APK oficial é publicado aqui, assinado sempre
+          com a mesma chave — as versões novas instalam por cima sem perder suas listas.</p>
+      </details>
+      <details>
+        <summary>E se eu bloquear alguém importante sem querer?</summary>
+        <p>No Histórico, toque no ⋮ da ligação e escolha "Desbloquear" ou "Sempre permitir". E, nos bloqueios mais
+          amplos, quem liga de novo em até 5 minutos consegue chamar.</p>
+      </details>
+      <details>
+        <summary>O app lê minhas mensagens ou meu histórico de chamadas?</summary>
+        <p>Não. Ele só vê a chamada que está chegando, no momento em que ela chega, para decidir se toca ou não.</p>
+      </details>
+      <details>
+        <summary>Por que ligações dos meus contatos não aparecem no app?</summary>
+        <p>O Android não mostra ligações de contatos para apps de bloqueio — e elas nunca são bloqueadas, a menos que
+          você coloque o número na lista de bloqueio.</p>
+      </details>
+      <details>
+        <summary>Funciona no iPhone?</summary>
+        <p>Não. O app é para Android 10 ou mais novo.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="final">
+      <h2>Chega de ligação chata.</h2>
+      <p>Instale agora e deixe o spam falando sozinho.</p>
+      <a class="btn btn-primary" href="https://github.com/daltonfontes/tomaesseblock/releases/latest/download/tomaesseblock.apk">
+        <svg width="20" height="20"><use href="#i-save"/></svg>Baixar o APK
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="wrap">
+    <span>© 2026 Toma Esse Block</span>
+    <span>
+      <a href="privacidade.html">Privacidade</a> ·
+      <a href="https://github.com/daltonfontes/tomaesseblock/releases">Todas as versões</a> ·
+      <a href="https://github.com/daltonfontes/tomaesseblock">GitHub</a> ·
+      <a href="https://github.com/daltonfontes/tomaesseblock/issues">Reportar problema</a>
+    </span>
+  </div>
+</footer>
+
 </body>
 </html>
