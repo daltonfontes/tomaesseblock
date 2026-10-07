@@ -1,4 +1,4 @@
-# Política de Privacidade — Toma Esse Block
+# Política de Privacidade — Calloff
 
 A política de privacidade oficial está publicada em:
 

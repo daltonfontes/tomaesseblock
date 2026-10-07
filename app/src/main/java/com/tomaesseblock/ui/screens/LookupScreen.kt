@@ -43,9 +43,11 @@ import com.tomaesseblock.domain.PhoneNumbers
 import com.tomaesseblock.domain.SpamCategory
 import com.tomaesseblock.ui.LookupResult
 import com.tomaesseblock.ui.MainViewModel
-import com.tomaesseblock.ui.theme.Danger
-import com.tomaesseblock.ui.theme.Safe
-import com.tomaesseblock.ui.theme.Warning
+import com.tomaesseblock.ui.theme.Extrato
+import androidx.compose.foundation.background
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun LookupScreen(vm: MainViewModel) {
@@ -82,7 +84,7 @@ fun LookupContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        ScreenTitle("Buscar número")
+        ScreenTitle("Quem ligou?")
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
@@ -93,13 +95,13 @@ fun LookupContent(
             trailingIcon = {
                 IconButton(onClick = { onLookup(query) }) { Icon(Icons.Filled.Search, contentDescription = "Buscar") }
             },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp),
         )
 
         result?.let { r ->
             ResultCard(r)
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (r.isBlockedExact) {
@@ -107,7 +109,7 @@ fun LookupContent(
                 } else {
                     Button(
                         onClick = onBlock,
-                        colors = ButtonDefaults.buttonColors(containerColor = Danger),
+                        colors = ButtonDefaults.buttonColors(containerColor = Extrato.colors.blocked, contentColor = Color.White),
                         modifier = Modifier.weight(1f),
                     ) { Text("Bloquear") }
                 }
@@ -143,28 +145,55 @@ fun LookupContent(
 
 @Composable
 private fun ResultCard(r: LookupResult) {
-    val (color, verdict) = when {
-        r.isAllowedExact -> Safe to "Na sua lista de permitidos — sempre toca"
-        r.decision is CallDecision.Block -> Danger to "Será bloqueado: ${r.decision.label}"
-        r.spam != null -> Warning to "Suspeito — será identificado, mas não bloqueado"
-        else -> Safe to "Sem denúncias — chamada permitida"
+    val blocked = r.decision is CallDecision.Block && !r.isAllowedExact
+    val verdict = when {
+        r.isAllowedExact -> "SEMPRE TOCA"
+        r.decision is CallDecision.Block -> "SERIA BLOQUEADA"
+        r.spam != null -> "TOCA, COM AVISO"
+        else -> "TOCA"
     }
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.12f)),
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(PhoneNumbers.format(r.number), style = MaterialTheme.typography.headlineSmall)
-            r.identification?.let { Text(it, style = MaterialTheme.typography.titleMedium, color = color) }
-            Spacer(Modifier.size(8.dp))
-            Text(verdict, style = MaterialTheme.typography.bodyMedium)
-            r.spam?.let {
-                Text(
-                    "${it.reports} denúncia(s) • mais comum: ${it.topCategory.label}",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
+    val ink = MaterialTheme.colorScheme.onSurface
+    val dash = Extrato.colors.dash
+    Column(Modifier.fillMaxWidth().padding(20.dp)) {
+        HorizontalDivider(thickness = 2.dp, color = ink)
+        Text(
+            PhoneNumbers.format(r.number),
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(vertical = 10.dp),
+        )
+        LedgerLine("Contato", r.contactName ?: "não está na agenda", dash)
+        LedgerLine(
+            "Denúncias",
+            r.spam?.let { "${it.reports} · ${it.topCategory.label.lowercase()}" } ?: "nenhuma",
+            dash,
+        )
+        LedgerLine(
+            "Suas listas",
+            when {
+                r.isBlockedExact -> "bloqueados"
+                r.isAllowedExact -> "permitidos"
+                else -> "nenhuma"
+            },
+            dash,
+        )
+        (r.decision as? CallDecision.Block)?.let { LedgerLine("Motivo", it.label, dash) }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .background(if (blocked) Extrato.colors.blocked else ink)
+                .padding(horizontal = 12.dp, vertical = 14.dp),
+        ) {
+            Text("Resultado", color = MaterialTheme.colorScheme.surface, modifier = Modifier.weight(1f))
+            Text(verdict, color = MaterialTheme.colorScheme.surface, fontWeight = FontWeight.SemiBold)
         }
+    }
+}
+
+@Composable
+private fun LedgerLine(label: String, value: String, dash: Color) {
+    Row(Modifier.fillMaxWidth().dashedBottom(dash).padding(vertical = 10.dp)) {
+        Text(label, color = Extrato.colors.pencil, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.bodyMedium)
     }
 }
 

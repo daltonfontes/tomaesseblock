@@ -1,25 +1,30 @@
 package com.tomaesseblock.ui
 
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -32,12 +37,12 @@ import com.tomaesseblock.ui.screens.HomeScreen
 import com.tomaesseblock.ui.screens.LookupScreen
 import com.tomaesseblock.ui.screens.SettingsScreen
 
-internal enum class Tab(val route: String, val label: String, val icon: ImageVector) {
-    HOME("home", "Início", Icons.Filled.Shield),
-    BLOCKLIST("blocklist", "Bloqueios", Icons.Filled.Block),
-    HISTORY("history", "Histórico", Icons.Filled.History),
-    LOOKUP("lookup", "Buscar", Icons.Filled.Search),
-    SETTINGS("settings", "Ajustes", Icons.Filled.Settings),
+internal enum class Tab(val route: String, val label: String) {
+    HOME("home", "Hoje"),
+    HISTORY("history", "Registro"),
+    BLOCKLIST("blocklist", "Listas"),
+    LOOKUP("lookup", "Buscar"),
+    SETTINGS("settings", "Ajustes"),
 }
 
 @Composable
@@ -80,18 +85,37 @@ internal fun AppScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
-        bottomBar = {
-            NavigationBar {
-                Tab.entries.forEach { tab ->
-                    NavigationBarItem(
-                        selected = currentRoute == tab.route,
-                        onClick = { onTabSelected(tab) },
-                        icon = { Icon(tab.icon, contentDescription = null) },
-                        label = { Text(tab.label) },
+        bottomBar = { TabBar(currentRoute, onTabSelected) },
+        content = content,
+    )
+}
+
+/** Barra inferior de texto: a aba atual fica preenchida com a cor da tinta. */
+@Composable
+private fun TabBar(currentRoute: String?, onTabSelected: (Tab) -> Unit) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    Column(Modifier.background(MaterialTheme.colorScheme.surface).navigationBarsPadding()) {
+        HorizontalDivider(thickness = 2.dp, color = ink)
+        Row(Modifier.fillMaxWidth().selectableGroup()) {
+            Tab.entries.forEach { tab ->
+                val selected = currentRoute == tab.route
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 60.dp)
+                        .background(if (selected) ink else MaterialTheme.colorScheme.surface)
+                        .selectable(selected = selected, role = Role.Tab, onClick = { onTabSelected(tab) }),
+                ) {
+                    Text(
+                        tab.label.uppercase(),
+                        color = if (selected) MaterialTheme.colorScheme.surface else ink,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                        ),
                     )
                 }
             }
-        },
-        content = content,
-    )
+        }
+    }
 }

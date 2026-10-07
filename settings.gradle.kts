@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TomaEsseBlock"
+rootProject.name = "Calloff"
 include(":app")

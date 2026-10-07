@@ -66,15 +66,17 @@ jobs:
       - name: Renomear arquivos com a versão
         run: |
           mkdir -p dist
-          cp app/build/outputs/bundle/release/app-release.aab "dist/tomaesseblock-$RELEASE_TAG.aab"
-          cp app/build/outputs/apk/release/app-release.apk "dist/tomaesseblock-$RELEASE_TAG.apk"
-          # Nome fixo: o link .../releases/latest/download/tomaesseblock.apk (README e site)
+          cp app/build/outputs/bundle/release/app-release.aab "dist/calloff-$RELEASE_TAG.aab"
+          cp app/build/outputs/apk/release/app-release.apk "dist/calloff-$RELEASE_TAG.apk"
+          # Nome fixo: o link .../releases/latest/download/calloff.apk (README e site)
           # sempre aponta para a versão mais nova.
+          cp app/build/outputs/apk/release/app-release.apk dist/calloff.apk
+          # Nome antigo (Toma Esse Block), para links já compartilhados continuarem funcionando.
           cp app/build/outputs/apk/release/app-release.apk dist/tomaesseblock.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: tomaesseblock-${{ github.ref_name }}
+          name: calloff-${{ github.ref_name }}
           path: dist/*
 
       # A tag pode vir de um "git push" (Release ainda não existe) ou de um Release criado
@@ -87,6 +89,6 @@ jobs:
             gh release upload "$RELEASE_TAG" dist/* --clobber
           else
             gh release create "$RELEASE_TAG" dist/* \
-              --title "Toma Esse Block $RELEASE_TAG" \
+              --title "Calloff $RELEASE_TAG" \
               --generate-notes
           fi

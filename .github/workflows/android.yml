@@ -33,7 +33,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: tomaesseblock-debug-apk
+          name: calloff-debug-apk
           path: app/build/outputs/apk/debug/*.apk
 
       # Capturas de tela de todas as abas (tema claro e escuro), sem emulador.
@@ -42,7 +42,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: tomaesseblock-screenshots
+          name: calloff-screenshots
           path: app/src/test/snapshots/images/*.png
 
       # Valida o build de release (R8 + shrink). Sem assinatura: o pacote para o Play sai do
