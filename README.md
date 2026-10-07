@@ -104,15 +104,16 @@ No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Ess
 
 ### A cada lançamento
 1. Atualize `appVersion` no `gradle.properties` (ex.: `1.0.1` para correções, `1.1.0` para novidades) e faça o merge na `main`.
-2. Crie e envie a tag com a mesma versão:
+2. Crie o Release pelo site: *Releases → Draft a new release → Choose a tag* → digite `v1.0.0` →
+   *Create new tag on publish* (alvo: `main`) → *Publish release*. O workflow anexa o `.aab` e o `.apk` a ele.
+   Ou, pela linha de comando, crie e envie a tag com a mesma versão:
    ```bash
    git checkout main && git pull
    git tag v1.0.0
    git push origin v1.0.0
    ```
-   (ou pelo GitHub: *Releases → Draft a new release → Choose a tag → `v1.0.0`*).
-3. O workflow **Release** (`.github/workflows/release.yml`) roda os testes, gera o `.aab` e o `.apk` assinados e cria o
-   Release no GitHub com os dois anexados. Se a tag não bater com `appVersion`, ou se faltarem os secrets, ele falha
+3. O workflow **Release** (`.github/workflows/release.yml`) roda os testes, gera o `.aab` e o `.apk` assinados e os anexa
+   ao Release no GitHub (criando o Release, se ele ainda não existir). Se a tag não bater com `appVersion`, ou se faltarem os secrets, ele falha
    avisando o motivo.
 4. Envie o `tomaesseblock-v1.0.0.aab` no Play Console.
 
