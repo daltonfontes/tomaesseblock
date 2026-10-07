@@ -2,7 +2,7 @@
 
 ## Versões suportadas
 
-O Toma Esse Block ainda está em desenvolvimento inicial. Apenas a versão mais recente da branch `main`
+O Calloff ainda está em desenvolvimento inicial. Apenas a versão mais recente da branch `main`
 recebe correções de segurança.
 
 | Versão            | Suportada |

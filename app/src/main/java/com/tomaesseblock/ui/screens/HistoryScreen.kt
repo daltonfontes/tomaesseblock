@@ -18,15 +18,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Block
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,11 +35,10 @@ import androidx.compose.ui.unit.dp
 import com.tomaesseblock.data.CallEventEntity
 import com.tomaesseblock.domain.PhoneNumbers
 import com.tomaesseblock.ui.MainViewModel
-import com.tomaesseblock.ui.theme.Danger
-import com.tomaesseblock.ui.theme.Safe
-import com.tomaesseblock.ui.theme.Warning
-import java.text.DateFormat
+import com.tomaesseblock.ui.theme.Extrato
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HistoryScreen(vm: MainViewModel, onOpenNumber: (String) -> Unit) {
@@ -78,61 +73,66 @@ fun HistoryContent(
     val blocked = rules.filter { it.type == RuleType.EXACT && it.action == RuleAction.BLOCK }.map { it.pattern }.toSet()
     val allowed = rules.filter { it.type == RuleType.EXACT && it.action == RuleAction.ALLOW }.map { it.pattern }.toSet()
     var reportFor by remember { mutableStateOf<String?>(null) }
-    val formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+    val formatter = remember { SimpleDateFormat("dd/MM\nHH:mm", Locale("pt", "BR")) }
 
+    val dash = Extrato.colors.dash
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            ScreenTitle("Histórico", Modifier.weight(1f))
-            if (history.isNotEmpty()) {
-                TextButton(onClick = onClear, modifier = Modifier.padding(end = 8.dp)) { Text("Limpar") }
-            }
+        ScreenTitle("Registro") {
+            if (history.isNotEmpty()) TextButton(onClick = onClear) { Text("LIMPAR") }
         }
         if (history.isEmpty()) {
             Text(
                 "As chamadas analisadas pelo app aparecerão aqui.",
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        LazyColumn(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
             items(history, key = { it.id }) { event ->
                 val suspicious = !event.blocked && event.label?.startsWith("Possível spam") == true
-                ListItem(
-                    modifier = Modifier.clickable(enabled = event.number.isNotEmpty()) { onOpenNumber(event.number) },
-                    leadingContent = {
-                        when {
-                            event.blocked -> Icon(Icons.Filled.Block, contentDescription = "Bloqueada", tint = Danger)
-                            suspicious -> Icon(Icons.Filled.Warning, contentDescription = "Suspeita", tint = Warning)
-                            else -> Icon(Icons.Filled.Call, contentDescription = "Permitida", tint = Safe)
-                        }
-                    },
-                    headlineContent = { Text(PhoneNumbers.format(event.number)) },
-                    supportingContent = {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .dashedBottom(dash)
+                        .clickable(enabled = event.number.isNotEmpty()) { onOpenNumber(event.number) }
+                        .padding(top = 10.dp, bottom = 6.dp),
+                ) {
+                    Text(
+                        formatter.format(Date(event.timestamp)),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Extrato.colors.pencil,
+                        modifier = Modifier.width(64.dp).padding(top = 2.dp),
+                    )
+                    Column(Modifier.weight(1f).padding(top = 1.dp)) {
+                        Text(PhoneNumbers.format(event.number), style = MaterialTheme.typography.bodyLarge)
                         Text(
-                            listOfNotNull(
-                                if (event.blocked) "Bloqueada" else "Permitida",
-                                event.label?.takeIf { it.isNotBlank() },
-                            ).joinToString(" • "),
+                            event.label?.takeIf { it.isNotBlank() } ?: if (event.blocked) "Bloqueada" else "Permitida",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Extrato.colors.pencil,
                         )
-                    },
-                    trailingContent = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(formatter.format(Date(event.timestamp)), style = MaterialTheme.typography.labelSmall)
-                            if (event.number.isNotEmpty()) {
-                                NumberActionsMenu(
-                                    isBlocked = event.number in blocked,
-                                    isAllowed = event.number in allowed,
-                                    onBlock = { onBlock(event.number) },
-                                    onUnblock = { onUnblock(event.number) },
-                                    onAllow = { onAllow(event.number) },
-                                    onRemoveAllowed = { onRemoveAllowed(event.number) },
-                                    onReport = { reportFor = event.number },
-                                )
-                            }
-                        }
-                    },
-                )
-                HorizontalDivider()
+                    }
+                    StatusTag(
+                        text = when {
+                            event.blocked -> "Bloq"
+                            suspicious -> "Suspeita"
+                            else -> "Tocou"
+                        },
+                        blocked = event.blocked || suspicious,
+                        modifier = Modifier.padding(top = 3.dp),
+                    )
+                    if (event.number.isNotEmpty()) {
+                        NumberActionsMenu(
+                            isBlocked = event.number in blocked,
+                            isAllowed = event.number in allowed,
+                            onBlock = { onBlock(event.number) },
+                            onUnblock = { onUnblock(event.number) },
+                            onAllow = { onAllow(event.number) },
+                            onRemoveAllowed = { onRemoveAllowed(event.number) },
+                            onReport = { reportFor = event.number },
+                        )
+                    }
+                }
             }
         }
     }

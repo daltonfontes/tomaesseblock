@@ -66,7 +66,7 @@ object BackupCodec {
         } catch (e: Exception) {
             throw IllegalArgumentException("Arquivo não é um backup válido", e)
         }
-        require(root.optString("format") == FORMAT) { "Arquivo não é um backup do Toma Esse Block" }
+        require(root.optString("format") == FORMAT) { "Arquivo não é um backup do Calloff" }
         require(root.optInt("version", 0) in 1..VERSION) { "Backup de uma versão mais nova do app" }
 
         val rules = mutableListOf<BlockRule>()

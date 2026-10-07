@@ -1,17 +1,18 @@
-# Toma Esse Block 🛡️📵
+# Calloff
 
 App Android em **Kotlin** para identificar e bloquear chamadas indesejadas — inspirado no Whoscall.
+Site: <https://daltonfontes.github.io/tomaesseblock/> · O app se chamava *Toma Esse Block* até a versão 1.0.0.
 
 ## Baixar para testar
 
-**[⬇️ Baixar o APK (versão mais recente)](https://github.com/daltonfontes/tomaesseblock/releases/latest/download/tomaesseblock.apk)** · [todas as versões](https://github.com/daltonfontes/tomaesseblock/releases)
+**[⬇️ Baixar o APK (versão mais recente)](https://github.com/daltonfontes/tomaesseblock/releases/latest/download/calloff.apk)** · [todas as versões](https://github.com/daltonfontes/tomaesseblock/releases)
 
 Requer Android 10 ou mais novo. Para instalar:
 
-1. Abra o link acima **no celular** e baixe o `tomaesseblock.apk`.
+1. Abra o link acima **no celular** e baixe o `calloff.apk`.
 2. Toque no arquivo baixado. Na primeira vez, o Android pede para **permitir instalar apps desta fonte**
    (o navegador ou o gerenciador de arquivos) — permita e volte.
-3. Abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Esse Block* como app de identificação de chamadas e spam.
+3. Abra o app → **Ativar bloqueio de chamadas** → escolha *Calloff* como app de identificação de chamadas e spam.
 
 Versões novas instalam por cima da anterior, sem perder listas nem histórico. Encontrou um problema?
 [Abra uma issue](https://github.com/daltonfontes/tomaesseblock/issues) contando o modelo do celular, a versão do
@@ -61,7 +62,7 @@ app/src/main/java/com/tomaesseblock/
 ├── domain/   PhoneNumbers, CallDecisionEngine, modelos (lógica pura, testada)
 ├── data/     Room (regras, denúncias, histórico), DataStore (ajustes), contatos
 ├── service/  CallBlockerService, notificações e ações de notificação
-└── ui/       Jetpack Compose + Material 3 (Início, Bloqueios, Histórico, Buscar, Ajustes)
+└── ui/       Jetpack Compose + Material 3, visual "Extrato" (Hoje, Registro, Listas, Buscar, Ajustes)
 ```
 
 ## Compilar e rodar
@@ -75,15 +76,15 @@ Requisitos: Android Studio (Ladybug ou mais novo) / JDK 17 / Android SDK 35.
 ```
 
 O GitHub Actions (`.github/workflows/android.yml`) roda os testes e publica como artefatos, a cada push, o APK de debug,
-o pacote `.aab` de release e as capturas de tela de todas as abas (tema claro e escuro, `tomaesseblock-screenshots`).
+o pacote `.aab` de release e as capturas de tela de todas as abas (tema claro e escuro, `calloff-screenshots`).
 
-No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Esse Block* como app de identificação de chamadas e spam → permita contatos e notificações.
+No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Calloff* como app de identificação de chamadas e spam → permita contatos e notificações.
 
 > Observação: quando o app não é o discador padrão, o Android só consulta o serviço para números **fora** da agenda — o que é justamente o caso de spam.
 
 ## Versões
 
-- **Versão a lançar:** `appVersion` no `gradle.properties` (hoje `1.0.0`).
+- **Versão a lançar:** `appVersion` no `gradle.properties` (hoje `1.1.0`).
 - **`versionCode`:** calculado da versão, `major × 10000 + minor × 100 + patch` (1.0.0 → 10000, 1.2.3 → 10203).
   Sempre cresce junto com a versão, como o Play exige. `minor` e `patch` vão de 0 a 99.
 - **Builds de cada push (CI) e do Android Studio:** `versionName` = `1.0.0-dev+<execução>`, para não serem confundidos
@@ -115,7 +116,7 @@ No celular: abra o app → **Ativar bloqueio de chamadas** → escolha *Toma Ess
 3. O workflow **Release** (`.github/workflows/release.yml`) roda os testes, gera o `.aab` e o `.apk` assinados e os anexa
    ao Release no GitHub (criando o Release, se ele ainda não existir). Se a tag não bater com `appVersion`, ou se faltarem os secrets, ele falha
    avisando o motivo.
-4. Envie o `tomaesseblock-v1.0.0.aab` no Play Console.
+4. Envie o `calloff-v1.1.0.aab` no Play Console.
 
 Também é preciso, no Play Console: link da [política de privacidade](https://daltonfontes.github.io/tomaesseblock/privacidade.html), formulário de
 *Segurança dos dados* (contatos usados só no aparelho, nada coletado ou compartilhado), ícone
@@ -126,6 +127,11 @@ Também é preciso, no Play Console: link da [política de privacidade](https://
 A pasta `docs/` tem o site do app e a política de privacidade, publicados em
 <https://daltonfontes.github.io/tomaesseblock/privacidade.html>. Para ativar (uma vez só): *Settings → Pages → Build and deployment → Source:
 Deploy from a branch → Branch: `main` / pasta `/docs`*.
+
+## Créditos
+
+Fontes [IBM Plex Mono e IBM Plex Sans Condensed](https://github.com/IBM/plex), sob a SIL Open Font License
+(`third_party/ibm-plex/OFL.txt`).
 
 ## Próximos passos
 

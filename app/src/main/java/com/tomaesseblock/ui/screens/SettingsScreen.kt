@@ -57,7 +57,7 @@ fun SettingsScreen(vm: MainViewModel) {
             // Sem navegador instalado, simplesmente não abre.
             runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))) }
         },
-        onExport = { exportLauncher.launch("tomaesseblock-backup.json") },
+        onExport = { exportLauncher.launch("calloff-backup.json") },
         // Alguns gerenciadores de arquivos não marcam .json como application/json.
         onImport = { importLauncher.launch(arrayOf(BackupCodec.MIME_TYPE, "text/plain", "application/octet-stream")) },
         versionLabel = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
@@ -192,14 +192,7 @@ fun SettingsContent(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
-    )
-}
+private fun SectionHeader(text: String) = SectionLabel(text)
 
 @Composable
 private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
